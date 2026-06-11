@@ -77,10 +77,10 @@ struct CaptureView: View {
             .ignoresSafeArea()
         }
         .photosPicker(isPresented: $showLibrary, selection: $libraryItem, matching: .images)
-        .onChange(of: libraryItem) { _, item in
-            guard let item else { return }
+        .onChange(of: libraryItem) { newItem in          // iOS 16-compatible (single-arg)
+            guard let newItem else { return }
             Task {
-                if let data = try? await item.loadTransferable(type: Data.self),
+                if let data = try? await newItem.loadTransferable(type: Data.self),
                    let img  = UIImage(data: data) {
                     onImageSelected(img)
                 }

@@ -6,8 +6,10 @@ struct ExportView: View {
     let contact: ContactModel
     var onScanAnother: () -> Void
 
-    @State private var showContactVC = false
-    @State private var saved         = false
+    @State private var showContactVC  = false
+    @State private var shareItems: [Any] = []
+    @State private var showShare      = false
+    @State private var saved          = false
 
     var displayName: String {
         [contact.name, contact.company].first { !$0.isEmpty } ?? "Contact"
@@ -82,7 +84,7 @@ struct ExportView: View {
                         .animation(.spring(response: 0.3), value: saved)
                     }
 
-                    Button(action: shareVCard) {
+                    Button(action: prepareShare) {
                         HStack(spacing: 8) {
                             Image(systemName: "square.and.arrow.up")
                             Text("share .vcf")
@@ -110,31 +112,36 @@ struct ExportView: View {
         }
         .background(Color.appBg.ignoresSafeArea())
         .sheet(isPresented: $showContactVC) {
-            ContactSaveSheet(contact: contact) { saved = true }
+            ContactSaveSheet(contact: contact) { didSave in
+                showContactVC = false
+                if didSave { saved = true }
+            }
+        }
+        .sheet(isPresented: $showShare) {
+            ActivitySheet(items: shareItems)
         }
     }
 
     private var rowDivider: some View {
-        Divider()
-            .background(Color.appBorder)
-            .padding(.leading, 48)
+        Divider().background(Color.appBorder).padding(.leading, 48)
     }
 
-    private func shareVCard() {
+    private func prepareShare() {
         let vcf  = buildVCard()
         let url  = FileManager.default.temporaryDirectory
-            .appendingPathComponent("\(displayName.replacingOccurrences(of: " ", with: "_")).vcf")
+            .appendingPathComponent(
+                displayName.replacingOccurrences(of: " ", with: "_") + ".vcf"
+            )
         try? vcf.write(to: url, atomically: true, encoding: .utf8)
-        let vc   = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-        UIApplication.shared.firstKeyWindow?.rootViewController?
-            .present(vc, animated: true)
+        shareItems = [url]
+        showShare  = true
     }
 
     private func buildVCard() -> String {
         func esc(_ s: String) -> String {
             s.replacingOccurrences(of: "\\", with: "\\\\")
-             .replacingOccurrences(of: ";", with: "\\;")
-             .replacingOccurrences(of: ",", with: "\\,")
+             .replacingOccurrences(of: ";",  with: "\\;")
+             .replacingOccurrences(of: ",",  with: "\\,")
              .replacingOccurrences(of: "\n", with: "\\n")
         }
         let parts = contact.name.split(separator: " ")
@@ -170,7 +177,6 @@ struct ContactRow: View {
                 .foregroundStyle(Color.appAccent)
                 .frame(width: 20, height: 20)
                 .padding(.top, 2)
-
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.mono(9, weight: .bold))
@@ -190,29 +196,15 @@ struct ContactRow: View {
 
 struct ContactSaveSheet: UIViewControllerRepresentable {
     let contact: ContactModel
-    var onSave: () -> Void
+    var onComplete: (Bool) -> Void
 
     func makeUIViewController(context: Context) -> UINavigationController {
-        let cn = CNMutableContact()
-        let parts = contact.name.split(separator: " ")
-        cn.givenName       = parts.dropLast().joined(separator: " ")
-        cn.familyName      = parts.last.map(String.init) ?? ""
-        cn.jobTitle        = contact.title
-        cn.organizationName = contact.company
-        cn.phoneNumbers    = contact.phones.map {
-            CNLabeledValue(label: CNLabelWork, value: CNPhoneNumber(stringValue: $0))
-        }
-        cn.emailAddresses  = contact.emails.map {
-            CNLabeledValue(label: CNLabelWork, value: $0 as NSString)
-        }
-        if !contact.website.isEmpty {
-            cn.urlAddresses = [CNLabeledValue(label: CNLabelWork, value: contact.website as NSString)]
-        }
-        let vc             = CNContactViewController(forNewContact: cn)
-        vc.delegate        = context.coordinator
+        let cn = buildCNContact()
+        let vc = CNContactViewController(forNewContact: cn)
+        vc.contactStore = CNContactStore()
+        vc.delegate     = context.coordinator
         return UINavigationController(rootViewController: vc)
     }
-
     func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -223,19 +215,42 @@ struct ContactSaveSheet: UIViewControllerRepresentable {
 
         func contactViewController(_ vc: CNContactViewController,
                                    didCompleteWith contact: CNContact?) {
-            parent.onSave()
-            vc.dismiss(animated: true)
+            let saved = contact != nil
+            parent.onComplete(saved)
+            vc.navigationController?.dismiss(animated: true)
         }
+    }
+
+    private func buildCNContact() -> CNMutableContact {
+        let cn   = CNMutableContact()
+        let parts = contact.name.split(separator: " ")
+        cn.givenName        = parts.dropLast().joined(separator: " ")
+        cn.familyName       = parts.last.map(String.init) ?? ""
+        cn.jobTitle         = contact.title
+        cn.organizationName = contact.company
+        cn.phoneNumbers     = contact.phones.map {
+            CNLabeledValue(label: CNLabelWork, value: CNPhoneNumber(stringValue: $0))
+        }
+        cn.emailAddresses   = contact.emails.map {
+            CNLabeledValue(label: CNLabelWork, value: $0 as NSString)
+        }
+        if !contact.website.isEmpty {
+            cn.urlAddresses = [CNLabeledValue(label: CNLabelWork, value: contact.website as NSString)]
+        }
+        return cn
     }
 }
 
-// MARK: - UIWindow helper
+// MARK: - UIActivityViewController wrapper
 
-extension UIApplication {
-    var firstKeyWindow: UIWindow? {
-        connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows)
-            .first { $0.isKeyWindow }
+struct ActivitySheet: UIViewControllerRepresentable {
+    let items: [Any]
+    @Environment(\.dismiss) private var dismiss
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let vc = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        vc.completionWithItemsHandler = { _, _, _, _ in dismiss() }
+        return vc
     }
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
