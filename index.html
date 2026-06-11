@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f7f9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="VCardScan">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<title>VCardScan</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --text: #1a1d21;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --accent-press: #1d4ed8;
+    --border: #e2e5ea;
+    --danger: #dc2626;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --card: #1b1e22;
+      --text: #eef0f3;
+      --muted: #9aa1ab;
+      --accent: #3b82f6;
+      --accent-press: #2563eb;
+      --border: #2c3137;
+      --danger: #f87171;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 16px 16px 48px; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 2px 16px;
+  }
+  header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  header h1 span { color: var(--accent); }
+  #settingsBtn {
+    background: none; border: none; font-size: 22px; cursor: pointer;
+    padding: 6px; line-height: 1; color: var(--muted);
+  }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  #settingsPanel { display: none; }
+  #settingsPanel.open { display: block; }
+  #settingsPanel label { font-size: 13px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 6px; }
+  #settingsPanel .row { display: flex; gap: 8px; }
+  #settingsPanel input {
+    flex: 1; min-width: 0;
+  }
+  #settingsPanel .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
+  #keySavedMsg { color: #16a34a; font-size: 12px; margin-top: 6px; display: none; }
+
+  input, textarea {
+    font: inherit; color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 12px;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  textarea { resize: vertical; min-height: 64px; }
+
+  .btn {
+    font: inherit; font-weight: 600;
+    border: none; border-radius: 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-primary {
+    background: var(--accent); color: #fff;
+    width: 100%; padding: 16px;
+    font-size: 17px;
+  }
+  .btn-primary:active { background: var(--accent-press); }
+  .btn-primary:disabled { opacity: 0.55; }
+  .btn-small {
+    background: var(--accent); color: #fff;
+    padding: 11px 16px; font-size: 14px;
+  }
+  .btn-ghost {
+    background: none; color: var(--accent);
+    padding: 10px; font-size: 14px; width: 100%;
+  }
+
+  #scanBtn { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  #scanBtn .icon { font-size: 22px; }
+
+  #preview {
+    display: none;
+    width: 100%; max-height: 220px; object-fit: contain;
+    border-radius: 10px; margin-top: 12px;
+    background: var(--bg);
+  }
+
+  #status {
+    display: none;
+    align-items: center; gap: 10px;
+    margin-top: 14px; font-size: 14px; color: var(--muted);
+  }
+  #status.show { display: flex; }
+  #status.error { color: var(--danger); }
+  .spinner {
+    width: 18px; height: 18px; flex: none;
+    border: 2.5px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #formPanel { display: none; }
+  #formPanel.show { display: block; }
+  #formPanel h2 { font-size: 16px; margin-bottom: 14px; }
+  .field { margin-bottom: 12px; }
+  .field label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 5px;
+  }
+  .multi-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .multi-row input { flex: 1; min-width: 0; }
+  .remove-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 20px; cursor: pointer; padding: 0 6px; flex: none;
+  }
+  .add-btn {
+    background: none; border: none; color: var(--accent);
+    font: inherit; font-size: 13px; font-weight: 600;
+    cursor: pointer; padding: 2px 0;
+  }
+  #saveBtn { margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>VCard<span>Scan</span></h1>
+    <button id="settingsBtn" title="Settings" aria-label="Settings">&#9881;&#65039;</button>
+  </header>
+
+  <div id="settingsPanel" class="panel">
+    <label for="apiKeyInput">Anthropic API key</label>
+    <div class="row">
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="btn btn-small" id="saveKeyBtn">Save</button>
+    </div>
+    <div id="keySavedMsg">Key saved.</div>
+    <div class="hint">Stored only in this browser (localStorage) and sent directly to the Anthropic API. Get a key at console.anthropic.com.</div>
+  </div>
+
+  <div class="panel">
+    <button class="btn btn-primary" id="scanBtn">
+      <span class="icon">&#128247;</span><span id="scanBtnLabel">Scan business card</span>
+    </button>
+    <input type="file" id="fileInput" accept="image/*" capture="environment" hidden>
+    <img id="preview" alt="Card preview">
+    <div id="status"><div class="spinner" id="statusSpinner"></div><span id="statusText"></span></div>
+    <button class="btn btn-ghost" id="manualBtn">or enter contact manually</button>
+  </div>
+
+  <div id="formPanel" class="panel">
+    <h2>Contact details</h2>
+
+    <div class="field">
+      <label for="f_name">Name</label>
+      <input id="f_name" autocomplete="off" placeholder="Full name">
+    </div>
+    <div class="field">
+      <label for="f_company">Company</label>
+      <input id="f_company" autocomplete="off" placeholder="Company">
+    </div>
+    <div class="field">
+      <label for="f_jobTitle">Job title</label>
+      <input id="f_jobTitle" autocomplete="off" placeholder="Job title">
+    </div>
+
+    <div class="field">
+      <label>Phone numbers</label>
+      <div id="phoneList"></div>
+      <button class="add-btn" id="addPhoneBtn" type="button">+ Add phone</button>
+    </div>
+
+    <div class="field">
+      <label>Email addresses</label>
+      <div id="emailList"></div>
+      <button class="add-btn" id="addEmailBtn" type="button">+ Add email</button>
+    </div>
+
+    <div class="field">
+      <label for="f_website">Website</label>
+      <input id="f_website" autocomplete="off" autocapitalize="off" placeholder="example.com">
+    </div>
+    <div class="field">
+      <label for="f_address">Address</label>
+      <textarea id="f_address" placeholder="Street, city, country"></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="saveBtn">Save contact (.vcf)</button>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+var KEY_STORAGE = "vcardscan_api_key";
+var $ = function (id) { return document.getElementById(id); };
+
+/* ---------- Settings ---------- */
+
+$("settingsBtn").addEventListener("click", function () {
+  $("settingsPanel").classList.toggle("open");
+  $("apiKeyInput").value = localStorage.getItem(KEY_STORAGE) || "";
+});
+
+$("saveKeyBtn").addEventListener("click", function () {
+  localStorage.setItem(KEY_STORAGE, $("apiKeyInput").value.trim());
+  var msg = $("keySavedMsg");
+  msg.style.display = "block";
+  setTimeout(function () { msg.style.display = "none"; }, 2000);
+});
+
+/* ---------- Scan flow ---------- */
+
+$("scanBtn").addEventListener("click", function () {
+  if (!(localStorage.getItem(KEY_STORAGE) || "").trim()) {
+    $("settingsPanel").classList.add("open");
+    setStatus("Add your Anthropic API key first (gear icon above).", true);
+    $("apiKeyInput").focus();
+    return;
+  }
+  $("fileInput").value = "";
+  $("fileInput").click();
+});
+
+$("manualBtn").addEventListener("click", function () {
+  fillForm({});
+  showForm();
+});
+
+$("fileInput").addEventListener("change", function () {
+  var file = this.files && this.files[0];
+  if (file) handleImage(file);
+});
+
+function setStatus(text, isError, busy) {
+  var s = $("status");
+  s.classList.add("show");
+  s.classList.toggle("error", !!isError);
+  $("statusSpinner").style.display = busy ? "block" : "none";
+  $("statusText").textContent = text;
+}
+function clearStatus() { $("status").classList.remove("show"); }
+
+function handleImage(file) {
+  $("scanBtn").disabled = true;
+  setStatus("Compressing photo…", false, true);
+
+  resizeToJpeg(file, 1024, 0.85)
+    .then(function (result) {
+      $("preview").src = result.dataUrl;
+      $("preview").style.display = "block";
+      setStatus("Reading card with Claude…", false, true);
+      return extractContact(result.base64);
+    })
+    .then(function (contact) {
+      clearStatus();
+      fillForm(contact);
+      showForm();
+    })
+    .catch(function (err) {
+      setStatus(err.message || "Something went wrong.", true, false);
+    })
+    .then(function () {
+      $("scanBtn").disabled = false;
+      $("scanBtnLabel").textContent = "Scan another card";
+    });
+}
+
+/* Resize/compress client-side to ~1024px JPEG to keep API costs low. */
+function resizeToJpeg(file, maxDim, quality) {
+  return new Promise(function (resolve, reject) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var w = img.naturalWidth, h = img.naturalHeight;
+      var scale = Math.min(1, maxDim / Math.max(w, h));
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.round(w * scale);
+      canvas.height = Math.round(h * scale);
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      var dataUrl = canvas.toDataURL("image/jpeg", quality);
+      resolve({ dataUrl: dataUrl, base64: dataUrl.split(",")[1] });
+    };
+    img.onerror = function () {
+      URL.revokeObjectURL(url);
+      reject(new Error("Could not read that image. Try another photo."));
+    };
+    img.src = url;
+  });
+}
+
+/* ---------- Anthropic API ---------- */
+
+var EXTRACT_PROMPT =
+  "Extract the contact information from this business card image. " +
+  "Respond with ONLY a JSON object, no markdown fences, no explanation, using exactly these keys: " +
+  '{"name": string, "company": string, "jobTitle": string, "phones": string[], "emails": string[], "website": string, "address": string}. ' +
+  "Use an empty string or empty array for anything not on the card. " +
+  "Keep phone numbers formatted as printed. Put the full postal address on one line in \"address\".";
+
+function extractContact(base64Jpeg) {
+  var apiKey = (localStorage.getItem(KEY_STORAGE) || "").trim();
+  return fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5",
+      max_tokens: 1024,
+      messages: [{
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: "image/jpeg", data: base64Jpeg } },
+          { type: "text", text: EXTRACT_PROMPT }
+        ]
+      }]
+    })
+  })
+  .then(function (res) {
+    return res.json().catch(function () { return {}; }).then(function (body) {
+      if (!res.ok) {
+        var detail = body && body.error && body.error.message ? body.error.message : "HTTP " + res.status;
+        if (res.status === 401) detail = "Invalid API key. Check it in settings (gear icon).";
+        throw new Error("API error: " + detail);
+      }
+      return body;
+    });
+  })
+  .then(function (body) {
+    var text = "";
+    (body.content || []).forEach(function (block) {
+      if (block.type === "text") text += block.text;
+    });
+    var match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("Could not read contact data from the card. Try a sharper photo.");
+    try {
+      return JSON.parse(match[0]);
+    } catch (e) {
+      throw new Error("Could not read contact data from the card. Try a sharper photo.");
+    }
+  })
+  .catch(function (err) {
+    if (err instanceof TypeError) throw new Error("Network error. Check your connection and try again.");
+    throw err;
+  });
+}
+
+/* ---------- Form ---------- */
+
+function makeMultiRow(listEl, value, placeholder, type) {
+  var row = document.createElement("div");
+  row.className = "multi-row";
+  var input = document.createElement("input");
+  input.type = type;
+  input.value = value || "";
+  input.placeholder = placeholder;
+  input.autocapitalize = "off";
+  var remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "remove-btn";
+  remove.setAttribute("aria-label", "Remove");
+  remove.innerHTML = "&times;";
+  remove.addEventListener("click", function () { row.remove(); });
+  row.appendChild(input);
+  row.appendChild(remove);
+  listEl.appendChild(row);
+  return input;
+}
+
+$("addPhoneBtn").addEventListener("click", function () {
+  makeMultiRow($("phoneList"), "", "Phone number", "tel").focus();
+});
+$("addEmailBtn").addEventListener("click", function () {
+  makeMultiRow($("emailList"), "", "Email address", "email").focus();
+});
+
+function asArray(v) {
+  if (Array.isArray(v)) return v.filter(function (x) { return typeof x === "string" && x.trim(); });
+  if (typeof v === "string" && v.trim()) return [v];
+  return [];
+}
+function asString(v) { return typeof v === "string" ? v.trim() : ""; }
+
+function fillForm(contact) {
+  contact = contact || {};
+  $("f_name").value = asString(contact.name);
+  $("f_company").value = asString(contact.company);
+  $("f_jobTitle").value = asString(contact.jobTitle);
+  $("f_website").value = asString(contact.website);
+  $("f_address").value = asString(contact.address);
+
+  $("phoneList").innerHTML = "";
+  $("emailList").innerHTML = "";
+  var phones = asArray(contact.phones);
+  var emails = asArray(contact.emails);
+  if (!phones.length) phones = [""];
+  if (!emails.length) emails = [""];
+  phones.forEach(function (p) { makeMultiRow($("phoneList"), p, "Phone number", "tel"); });
+  emails.forEach(function (e) { makeMultiRow($("emailList"), e, "Email address", "email"); });
+}
+
+function showForm() {
+  $("formPanel").classList.add("show");
+  $("formPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function listValues(listEl) {
+  return Array.prototype.map.call(listEl.querySelectorAll("input"), function (i) { return i.value.trim(); })
+    .filter(function (v) { return v; });
+}
+
+/* ---------- vCard 3.0 ---------- */
+
+function vEscape(s) {
+  return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+}
+
+function buildVCard() {
+  var name = $("f_name").value.trim();
+  var company = $("f_company").value.trim();
+  var jobTitle = $("f_jobTitle").value.trim();
+  var website = $("f_website").value.trim();
+  var address = $("f_address").value.trim();
+  var phones = listValues($("phoneList"));
+  var emails = listValues($("emailList"));
+
+  var parts = name.split(/\s+/).filter(Boolean);
+  var last = parts.length > 1 ? parts[parts.length - 1] : "";
+  var first = parts.length > 1 ? parts.slice(0, -1).join(" ") : name;
+
+  var lines = [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    "N:" + vEscape(last) + ";" + vEscape(first) + ";;;",
+    "FN:" + vEscape(name || company || "Contact")
+  ];
+  if (company) lines.push("ORG:" + vEscape(company));
+  if (jobTitle) lines.push("TITLE:" + vEscape(jobTitle));
+  phones.forEach(function (p) { lines.push("TEL;TYPE=WORK,VOICE:" + vEscape(p)); });
+  emails.forEach(function (e) { lines.push("EMAIL;TYPE=INTERNET,WORK:" + vEscape(e)); });
+  if (website) lines.push("URL:" + vEscape(website));
+  if (address) lines.push("ADR;TYPE=WORK:;;" + vEscape(address) + ";;;;");
+  lines.push("END:VCARD");
+  return lines.join("\r\n") + "\r\n";
+}
+
+$("saveBtn").addEventListener("click", function () {
+  var name = $("f_name").value.trim();
+  if (!name && !$("f_company").value.trim()) {
+    setStatus("Enter at least a name or company before saving.", true, false);
+    return;
+  }
+  clearStatus();
+  var vcf = buildVCard();
+  var blob = new Blob([vcf], { type: "text/vcard;charset=utf-8" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  var fileName = (name || $("f_company").value.trim() || "contact")
+    .replace(/[^\wÀ-ɏ -]/g, "").trim().replace(/\s+/g, "_") || "contact";
+  a.href = url;
+  a.download = fileName + ".vcf";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+});
+</script>
+</body>
+</html>

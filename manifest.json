@@ -1,0 +1,12 @@
+{
+  "name": "VCardScan",
+  "short_name": "VCardScan",
+  "description": "Scan business cards into Contacts",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f6f7f9",
+  "theme_color": "#2563eb",
+  "icons": [
+    { "src": "icon.png", "sizes": "1024x1024", "type": "image/png" }
+  ]
+}
