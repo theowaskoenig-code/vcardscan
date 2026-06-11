@@ -1,0 +1,74 @@
+name: Build unsigned IPA
+
+on:
+  push:
+    branches:
+      - claude/business-card-ocr-ios-k5noam
+      - main
+  workflow_dispatch:   # also triggerable from the GitHub Actions tab
+
+jobs:
+  build:
+    runs-on: macos-14   # Apple Silicon runner — free, has Xcode 15 & 16
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pick newest Xcode
+        run: |
+          XCODE=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Using: $XCODE"
+          sudo xcode-select -s "$XCODE/Contents/Developer"
+          xcodebuild -version
+
+      - name: Build & archive (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project VCardScan.xcodeproj \
+            -scheme VCardScan \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/VCardScan.xcarchive" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM="" \
+            -quiet
+          echo "Archive produced:"
+          ls "$RUNNER_TEMP/VCardScan.xcarchive/Products/Applications/"
+
+      - name: Package IPA
+        run: |
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -R \
+            "$RUNNER_TEMP/VCardScan.xcarchive/Products/Applications/VCardScan.app" \
+            "$RUNNER_TEMP/Payload/"
+          cd "$RUNNER_TEMP"
+          zip -r VCardScan-unsigned.ipa Payload/
+          echo "IPA size: $(du -sh VCardScan-unsigned.ipa | cut -f1)"
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: VCardScan-unsigned
+          path: ${{ runner.temp }}/VCardScan-unsigned.ipa
+          retention-days: 14
+
+      - name: Write job summary
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## VCardScan build complete ✓
+
+          Download **VCardScan-unsigned.ipa** from the Artifacts panel above, then:
+
+          ### Install on iPhone with Sideloadly (Windows or Mac, free)
+          1. [Download Sideloadly](https://sideloadly.io) and install it on your PC
+          2. Connect iPhone via USB
+          3. Drag `VCardScan-unsigned.ipa` into Sideloadly
+          4. Enter your free Apple ID — Sideloadly signs and pushes the app
+          5. **iPhone:** Settings → General → VPN & Device Management → trust your Apple ID
+          6. App expires in **7 days** — re-run this workflow and repeat to resign
+          EOF
