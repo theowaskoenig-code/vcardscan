@@ -33,6 +33,7 @@ BL_URL = "https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_
 # Anzeige-/Clip-Fenster (Mitteleuropa).
 CLIP = (-1.0, 43.0, 23.0, 57.5)   # minx,miny,maxx,maxy
 VIEW_MED = [[46.0, 4.0], [56.0, 19.5]]
+VIEW_MED_E = [[46.0, 4.0], [56.5, 21.8]]   # weiter nach Osten (zeigt ganz Preußen)
 VIEW_ANCIENT = [[43.5, 2.0], [56.0, 20.0]]
 VIEW_MODERN = [[46.5, 4.0], [56.0, 21.0]]
 
@@ -329,11 +330,19 @@ FACTIONS = {
                             "Im Frieden von Basel von der Reichsgerichtsbarkeit gelöst."]},
       "1648": {"foreign": True, "keyFacts": ["Im Westfälischen Frieden 1648 formell aus dem Reichsverband entlassen."]},
     }),
-  "deutschorden": F("Deutschordensstaat", "#9aa0a8", "theocracy",
-    origin="Ordensstaat des Deutschen Ordens an der Ostsee (ab 1226).",
-    house="Deutscher Orden (Hochmeister)", capital="Marienburg",
-    eras={"1356": {"foreign": True, "keyFacts": ["Kreuzritterstaat in Preußen und im Baltikum.",
-                                                 "Wirtschaftlich über die Hanse mit dem Reich verbunden."]}}),
+  "deutschorden": F("Deutschordensstaat", "#4a4f5e", "theocracy",
+    origin="Geistlicher Ritterorden, 1190 im Heiligen Land (Akkon) gegründet; ab 1226 Eroberung und Christianisierung Preußens.",
+    house="Deutscher Orden (Hochmeister)", capital="Marienburg (ab 1309)",
+    eras={
+      "1356": {"keyFacts": ["Mächtiger deutscher Kreuzritterstaat in Preußen und im Baltikum.",
+                            "Residenz des Hochmeisters ist die Marienburg, die größte Backsteinburg Europas.",
+                            "Wirtschaftlich über die Hanse eng mit dem Reich verbunden.",
+                            "Dauerkonflikt mit dem christlichen Polen-Litauen."]},
+      "1500": {"name": "Deutschordensstaat (Preußen)",
+               "keyFacts": ["Nach der Niederlage bei Tannenberg/Grunwald (1410) im Niedergang.",
+                            "Zweiter Thorner Frieden (1466): Verlust Westpreußens an Polen, Ostpreußen wird polnisches Lehen.",
+                            "1525 wandelt Albrecht von Brandenburg den Ordensstaat in das weltliche Herzogtum Preußen um."]},
+    }),
 
   # ---- Deutscher Bund / Kaiserreich ----
   "deutscher_bund": F("Deutscher Bund", "#b8a06a", "confederation",
@@ -767,9 +776,9 @@ ERAS = [
   (1200,"Um 1200 — Stauferzeit", "clio",
    "Unter den Staufern erreicht das Reich seine größte Ausdehnung. Neue Mächte wie das Königreich Böhmen treten hervor.", VIEW_MED),
   (1356,"Goldene Bulle (1356)", "clio",
-   "Karl IV. erlässt die Goldene Bulle: Sieben Kurfürsten wählen fortan den König. Das Reich ist ein Flickenteppich aus Hunderten Territorien.", VIEW_MED),
+   "Karl IV. erlässt die Goldene Bulle: Sieben Kurfürsten wählen fortan den König. Das Reich ist ein Flickenteppich aus Hunderten Territorien — im Nordosten der Deutschordensstaat in Preußen.", VIEW_MED_E),
   (1500,"Um 1500 — Reichsreform", "clio",
-   "An der Schwelle zur Neuzeit: Reichsreform unter Maximilian I., Aufstieg der Habsburger, faktische Unabhängigkeit der Eidgenossenschaft.", VIEW_MED),
+   "An der Schwelle zur Neuzeit: Reichsreform unter Maximilian I., Aufstieg der Habsburger, faktische Unabhängigkeit der Eidgenossenschaft.", VIEW_MED_E),
   (1648,"1648 — Westfälischer Friede", "clio",
    "Das Ende des Dreißigjährigen Krieges. Die Reichsstände werden faktisch souverän; Brandenburg-Preußen und das wettinische Sachsen steigen auf.", VIEW_MED),
   (1815,"1815 — Deutscher Bund", "clio",
