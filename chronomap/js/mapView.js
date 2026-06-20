@@ -17,9 +17,11 @@ export class MapView {
       worldCopyJump: false,
     });
     this.map.attributionControl.setPrefix(
-      'Geometrie © <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth</a> · ' +
-      'Karte mit <a href="https://leafletjs.com">Leaflet</a> · ' +
-      'Grenzen stark vereinfacht'
+      'Territorien (1000–1871) © <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria / Seshat</a> ' +
+      '(<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>) · ' +
+      'Küsten © <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth</a> · ' +
+      '<a href="https://leafletjs.com">Leaflet</a> · ' +
+      'antike Zonen & Grenzen vereinfacht/näherungsweise'
     );
 
     this.createPanes();

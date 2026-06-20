@@ -1,0 +1,1 @@
+{"schemaVersion":1,"settlements":[{"id":"koeln","name":"Köln","lat":50.94,"lon":6.96,"kind":"stadt","importance":2,"factionId":"franken_v"},{"id":"trier","name":"Trier","lat":49.76,"lon":6.64,"kind":"stadt","importance":2,"factionId":"franken_v"},{"id":"ravenna","name":"Ravenna","lat":44.42,"lon":12.2,"kind":"residenz","importance":2,"factionId":"ostgoten"}]}

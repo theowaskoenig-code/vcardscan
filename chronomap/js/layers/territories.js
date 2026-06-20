@@ -8,18 +8,21 @@ export function colorFor(props, factions) {
   return (f && f.color) || FALLBACK_COLOR;
 }
 
+// Nachbarmächte (foreign) treten gedämpft zurück, damit die deutschen
+// Lande hervorstechen.
 const baseStyle = (props, factions) => ({
-  color: "#5c4326",
-  weight: 1,
+  color: props.foreign ? "#7a6a55" : "#5c4326",
+  weight: props.foreign ? 0.8 : 1,
   fillColor: colorFor(props, factions),
-  fillOpacity: props.fillOpacity != null ? props.fillOpacity : 0.5,
+  fillOpacity: props.fillOpacity != null ? props.fillOpacity
+    : (props.foreign ? 0.32 : 0.55),
 });
 
 const highlightStyle = (props, factions) => ({
   color: "#3a2a14",
   weight: 3,
   fillColor: colorFor(props, factions),
-  fillOpacity: 0.78,
+  fillOpacity: 0.8,
 });
 
 // L: das globale Leaflet, geojson: FeatureCollection, factions: Metadaten,

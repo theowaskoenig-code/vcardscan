@@ -1,5 +1,9 @@
 /* ChronoMap Service Worker — App-Shell und Daten für Offline-Betrieb cachen. */
-const CACHE = "chronomap-v1";
+const CACHE = "chronomap-v2";
+
+const YEARS = [-100, 100, 500, 1000, 1200, 1356, 1500, 1648, 1815, 1871];
+const SETTLEMENT_YEARS = [100, 500, 1000, 1200, 1356, 1500, 1648, 1815, 1871];
+const CULTURE_YEARS = [1000, 1200, 1356, 1500];
 
 const ASSETS = [
   "./", "index.html", "manifest.json", "icon.png",
@@ -15,16 +19,19 @@ const ASSETS = [
   "js/layers/territories.js", "js/layers/cultures.js", "js/layers/settlements.js",
   "data/geo/land.geojson", "data/geo/lakes.geojson",
   "data/eras/index.json", "data/factions/factions.json",
-  "data/eras/1000.json", "data/eras/1200.json", "data/eras/1356.json", "data/eras/1500.json",
-  "data/layers/territories/1000.geojson", "data/layers/territories/1200.geojson",
-  "data/layers/territories/1356.geojson", "data/layers/territories/1500.geojson",
-  "data/layers/cultures/1356.geojson",
-  "data/layers/settlements/1000.json", "data/layers/settlements/1200.json",
-  "data/layers/settlements/1356.json", "data/layers/settlements/1500.json",
-];
+]
+  .concat(YEARS.map((y) => `data/eras/${y}.json`))
+  .concat(YEARS.map((y) => `data/layers/territories/${y}.geojson`))
+  .concat(SETTLEMENT_YEARS.map((y) => `data/layers/settlements/${y}.json`))
+  .concat(CULTURE_YEARS.map((y) => `data/layers/cultures/${y}.geojson`));
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  // Einzeln cachen, damit ein fehlendes Asset den Install nicht abbricht.
+  e.waitUntil(
+    caches.open(CACHE).then((c) =>
+      Promise.allSettled(ASSETS.map((u) => c.add(u)))
+    ).then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (e) => {
