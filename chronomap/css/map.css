@@ -1,0 +1,43 @@
+/* Leaflet im Pergament-Stil. */
+.leaflet-container {
+  background: var(--sea);
+  font-family: var(--serif);
+}
+
+/* Zoom-Bedienelemente. */
+.leaflet-bar a {
+  background: var(--paper); color: var(--ink);
+  border-bottom-color: var(--paper-edge);
+}
+.leaflet-bar a:hover { background: var(--paper-2); }
+
+/* Attribution dezent ins Thema einpassen. */
+.leaflet-control-attribution {
+  background: rgba(239, 227, 200, 0.82) !important;
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-family: var(--serif);
+}
+.leaflet-control-attribution a { color: var(--accent); }
+
+/* Tooltips als kleine Pergamentschilder. */
+.cm-tooltip, .cm-place-label {
+  background: var(--paper); color: var(--ink);
+  border: 1px solid var(--paper-edge);
+  border-radius: 6px;
+  font-family: var(--serif);
+  box-shadow: 0 1px 4px var(--shadow);
+}
+.cm-tooltip { font-size: 12px; padding: 4px 8px; }
+.cm-tooltip strong { color: var(--accent); }
+
+/* Dauerhafte Ortslabels: transparent, nur Schrift. */
+.cm-place-label.leaflet-tooltip {
+  background: transparent; border: none; box-shadow: none;
+  color: var(--ink); font-size: 12px; font-weight: 700;
+  text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper);
+  padding: 0;
+}
+.cm-place-label.leaflet-tooltip:before { display: none; }
+
+.leaflet-tooltip.cm-tooltip:before { border-top-color: var(--paper-edge); }

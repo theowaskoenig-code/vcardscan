@@ -1,0 +1,12 @@
+{
+  "name": "ChronoMap Deutschland",
+  "short_name": "ChronoMap",
+  "description": "Interaktive Geschichtskarte: Völker, Mächte und Grenzen im Wandel der Zeit",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#a9b7a0",
+  "theme_color": "#7a4a25",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
