@@ -1,5 +1,7 @@
-/* ChronoMap Service Worker — App-Shell und Daten für Offline-Betrieb cachen. */
-const CACHE = "chronomap-v2";
+/* ChronoMap Service Worker — App-Shell und Daten für Offline-Betrieb cachen.
+   Strategie: network-first (immer aktuell, wenn online), Cache nur als
+   Offline-Reserve. So erscheinen Updates ohne manuelles Leeren des Caches. */
+const CACHE = "chronomap-v3";
 
 const YEARS = [-100, 100, 500, 1000, 1200, 1356, 1500, 1648, 1815, 1871];
 const SETTLEMENT_YEARS = [100, 500, 1000, 1200, 1356, 1500, 1648, 1815, 1871];
@@ -44,13 +46,13 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+  if (new URL(e.request.url).origin !== self.location.origin) return;
+  // Network-first: online stets frische Inhalte, Cache als Reserve (offline).
   e.respondWith(
-    caches.match(e.request).then((hit) =>
-      hit || fetch(e.request).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
-        return res;
-      }).catch(() => hit)
-    )
+    fetch(e.request).then((res) => {
+      const copy = res.clone();
+      caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });

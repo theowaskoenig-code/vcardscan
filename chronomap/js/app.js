@@ -105,6 +105,14 @@ boot();
 
 // Offline-Unterstützung (nur über http(s), nicht bei file://).
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  // Lädt die Seite einmal neu, sobald ein neuer Service Worker übernimmt,
+  // damit Updates ohne manuelles Leeren des Caches erscheinen.
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloading) return;
+    reloading = true;
+    window.location.reload();
+  });
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch((err) => console.warn("SW:", err));
   });
