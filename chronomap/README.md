@@ -8,7 +8,7 @@ hervorheben und im Detail anzeigen lassen.
 > Optik im **Pergament-Stil** (Sepia, Serifenschrift). Reine statische Web-App
 > ohne Build-Schritt.
 
-## Epochen (10)
+## Epochen (17)
 
 | Jahr | Epoche | Datenquelle |
 |------|--------|-------------|
@@ -22,17 +22,29 @@ hervorheben und im Detail anzeigen lassen.
 | 1648 | Westfälischer Friede | Cliopatria |
 | 1815 | Deutscher Bund | Cliopatria |
 | 1871 | Deutsches Kaiserreich | Cliopatria |
+| 1914 | Vor dem Ersten Weltkrieg | Cliopatria |
+| 1919 | Weimarer Republik (Versailles) | Cliopatria |
+| 1938 | NS-Staat (Anschluss & Sudetenland) | Cliopatria |
+| 1942 | Zweiter Weltkrieg (größte Ausdehnung) | Cliopatria |
+| 1961 | Geteiltes Deutschland (BRD & DDR) | Cliopatria |
+| 1990 | Wiedervereinigung | Cliopatria |
+| Heute | Bundesrepublik (16 Bundesländer) | deutschlandGeoJSON |
 
 Der Zeitschieber läuft durchgehend; die Karte zeigt jeweils den
 **nächstgelegenen** definierten Zeitschnitt.
 
 ## Daten & Genauigkeit
 
-- **Territorien 1000–1871** stammen aus **Cliopatria** (Seshat Global History
+- **Territorien 1000–2024** stammen aus **Cliopatria** (Seshat Global History
   Databank), einem recherchierten, offen lizenzierten Datensatz mit echten
   Grenzverläufen — **CC BY 4.0**. Für die Karte ausgewählt, auf Mitteleuropa
   zugeschnitten und vereinfacht.
   <https://github.com/Seshat-Global-History-Databank/cliopatria>
+- **Bundesländer** (Epoche „Heute“) aus **deutschlandGeoJSON** (Public
+  Domain / Unlicense). <https://github.com/isellsoap/deutschlandGeoJSON>
+- Das **20. Jahrhundert** ist bewusst nüchtern dargestellt; die NS-Zeit
+  (1938/1942) zeigt historische Tatsachen (auch militärisch besetzte Gebiete)
+  ohne Verherrlichung.
 - **Antike Epochen** (~100 v. Chr., ~100, ~500) sind **von Hand angelegte
   Näherungszonen** (eigene Arbeit). Für diese Zeit gibt es keine exakten
   Vektordaten, und Stammesgrenzen waren ohnehin fließend — daher bewusst grob
@@ -93,6 +105,7 @@ die Polygone auf Mitteleuropa zu, vereinfacht sie und schreibt alle
 
 - Code: wie Repository.
 - Territoriendaten: **CC BY 4.0** (Cliopatria / Seshat Global History Databank).
+- Bundesländer: Public Domain / Unlicense (deutschlandGeoJSON).
 - Küstendaten: Natural Earth (gemeinfrei).
 - Kartenbibliothek: Leaflet (BSD-2-Clause).
 

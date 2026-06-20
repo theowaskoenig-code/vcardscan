@@ -59,6 +59,7 @@
   background: var(--gold); border: none; padding: 0; cursor: pointer;
 }
 .tl-tick:hover { background: var(--accent); height: 20px; }
+.tl-tick.is-active { background: var(--accent); height: 22px; width: 3px; }
 
 input[type="range"] {
   -webkit-appearance: none; appearance: none;

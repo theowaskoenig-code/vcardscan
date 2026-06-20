@@ -27,6 +27,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
 CLIO_LOCAL = "/tmp/clio_out/cliopatria_polities_only.geojson"
 CLIO_URL = "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/main/cliopatria.geojson.zip"
+BL_LOCAL = "/tmp/bl.geojson"
+BL_URL = "https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/4_niedrig.geo.json"
 
 # Anzeige-/Clip-Fenster (Mitteleuropa).
 CLIP = (-1.0, 43.0, 23.0, 57.5)   # minx,miny,maxx,maxy
@@ -316,7 +318,8 @@ FACTIONS = {
                                 "Aus der Linie Calenberg geht später Hannover hervor."]}}),
 
   # ---- Schweiz / Deutscher Orden ----
-  "eidgenossenschaft": F("Alte Eidgenossenschaft", "#8a8d92", "confederation",
+  "eidgenossenschaft": F("Eidgenossenschaft (Schweiz)", "#8a8d92", "confederation",
+    foreign=True,
     origin="1291 als Bund der Waldstätte entstanden.",
     house="Bund autonomer Orte", capital=None,
     eras={
@@ -346,7 +349,52 @@ FACTIONS = {
     eras={"1871": {"keyFacts": ["Reichsgründung am 18. Januar 1871 in Versailles; Wilhelm I. wird Kaiser.",
                                 "Bundesstaat aus 25 Gliedstaaten unter Vorherrschaft Preußens.",
                                 "Reichskanzler Otto von Bismarck prägt die Politik.",
-                                "Österreich bleibt außerhalb (kleindeutsche Lösung)."]}}),
+                                "Österreich bleibt außerhalb (kleindeutsche Lösung)."]},
+          "1914": {"rulingHouse": "Haus Hohenzollern (Wilhelm II.)",
+                   "keyFacts": ["Am Vorabend des Ersten Weltkriegs eine führende Industrie- und Militärmacht.",
+                                "Kolonialreich in Afrika und im Pazifik.",
+                                "Bündnis mit Österreich-Ungarn (Mittelmächte)."]},
+          "1919": {"name": "Deutsches Reich (Weimarer Republik)", "rank": "republic",
+                   "rulingHouse": "Parlamentarische Republik", "capital": "Berlin (Nationalversammlung in Weimar)",
+                   "keyFacts": ["Nach Kriegsniederlage und Novemberrevolution 1918 wird das Reich Republik.",
+                                "Der Versailler Vertrag erzwingt Gebietsabtretungen: Elsass-Lothringen an Frankreich, "
+                                "Westpreußen und Posen an Polen, Nordschleswig an Dänemark, Eupen-Malmedy an Belgien.",
+                                "Danzig wird Freie Stadt; das Saargebiet unter Völkerbundsverwaltung."]}}),
+  "ns_reich": F("Deutsches Reich (NS-Diktatur)", "#5a534b", "dictatorship",
+    origin="Nach der Machtübernahme der Nationalsozialisten 1933 errichtete Diktatur.",
+    house="NS-Diktatur (Adolf Hitler)", religion="—", capital="Berlin",
+    eras={
+      "1938": {"keyFacts": ["1933 Ende der Weimarer Republik, Errichtung der NS-Diktatur.",
+                            "März 1938 „Anschluss“ Österreichs, Oktober 1938 Angliederung des Sudetenlands.",
+                            "Verfolgung politischer Gegner und der jüdischen Bevölkerung."]},
+      "1942": {"name": "Deutsches Reich & besetzte Gebiete (1942)",
+               "keyFacts": ["Größte Ausdehnung der deutschen Herrschaft im Zweiten Weltkrieg.",
+                            "Weite Teile Europas sind militärisch besetzt oder annektiert (kein legitimer Staatsbesitz).",
+                            "Zeit von Vernichtungskrieg und Holocaust.",
+                            "1945 vollständige Niederlage und Ende der NS-Herrschaft."]},
+    }),
+  "brd": F("Bundesrepublik Deutschland", "#3a6ea5", "republic",
+    origin="1949 im Westen aus den drei westlichen Besatzungszonen gegründet (Grundgesetz, 23. Mai 1949).",
+    house="Parlamentarische Demokratie", religion="Christlich geprägt, pluralistisch", capital="Bonn",
+    eras={
+      "1961": {"keyFacts": ["Westlicher Teilstaat, in NATO und (ab 1957) Europäische Gemeinschaft eingebunden.",
+                            "„Wirtschaftswunder“ unter Konrad Adenauer und Ludwig Erhard.",
+                            "1957 tritt das Saarland als zehntes Bundesland bei."]},
+      "1990": {"keyFacts": ["Am 3. Oktober 1990 tritt die DDR der Bundesrepublik bei — Wiedervereinigung.",
+                            "Zwei-plus-Vier-Vertrag (12. September 1990) regelt die volle Souveränität.",
+                            "Hauptstadt wird wieder Berlin."]},
+    }),
+  "ddr": F("Deutsche Demokratische Republik", "#a8472e", "republic",
+    origin="1949 im Osten unter sowjetischem Einfluss gegründet (7. Oktober 1949).",
+    house="Sozialistischer Einparteienstaat (SED)", religion="Staatlich atheistisch geprägt", capital="Ost-Berlin",
+    eras={
+      "1961": {"keyFacts": ["Sozialistischer Staat im Ostblock (Warschauer Pakt).",
+                            "Am 13. August 1961 Bau der Berliner Mauer.",
+                            "Planwirtschaft und Herrschaft der SED."]},
+      "1990": {"keyFacts": ["1989 Friedliche Revolution; Fall der Berliner Mauer am 9. November 1989.",
+                            "Erste freie Volkskammerwahl im März 1990.",
+                            "Beitritt zur Bundesrepublik am 3. Oktober 1990."]},
+    }),
 
   # ---- Antike (eigene Näherungszonen) ----
   "kelten": F("Keltische Stämme (La Tène)", "#7a8a5a", "people", religion="Keltische Religion",
@@ -454,7 +502,26 @@ NAME_MAP = {
   "Duchy of Greater Poland": "polen", "Duchy of Silesia": "schlesien",
   "Duchy of Sandomierz": "polen", "Duchy of Opole": "schlesien",
   "Duchy of Wrocław": "schlesien", "Duchy of Kuyavia": "polen",
+  # 20./21. Jahrhundert
+  "German Empire": "deutsches_reich", "Weimar Republic": "deutsches_reich",
+  "Nazi Germany": "ns_reich",
+  "Federal Republic of Germany": "brd", "German Democratic Republic": "ddr",
+  "Republic of Austria": "oesterreich_rep", "Second Republic of Austria": "oesterreich_rep",
+  "Czechoslovakia": "tschechoslowakei", "Czech Republic": "tschechien",
+  "Slovakia": "slowakei", "Republic of Slovenia": "slowenien",
+  "Republic of Croatia": "kroatien_rep", "Independent State of Croatia": "kroatien_ns",
+  "Second Polish Republic": "polen_2", "Republic of Poland": "polen_rep",
+  "Hungarian Republic": "ungarn_rep", "Hungary": "ungarn_rep",
+  "Hungarian People's Republic": "ungarn_rep",
+  "Yugoslavia": "jugoslawien", "Socialist Federal Republic of Yugoslavia": "jugoslawien",
+  "Free City of Danzig": "danzig", "Luxembourg": "luxemburg_staat",
+  "Union of Soviet Socialist Republics": "sowjetunion",
+  "Vichy France": "frankreich_vichy", "Republic of Italy": "italien",
+  "Kingdom of Belgium": "belgien", "Kingdom of Sweden": "schweden",
 }
+# Hinweis: „German Empire“ deckt Kaiserreich (1871/1914) und Weimarer Reich
+# (1919) ab; „Federated Republic of Germany“ (2024) wird bewusst NICHT
+# kartiert, weil die Gegenwart stattdessen in Bundesländer aufgeteilt wird.
 
 # Zusätzliche (meist ausländische) Fraktionen, knapp gehalten.
 FOREIGN = {
@@ -487,11 +554,54 @@ FOREIGN = {
   "spanien": ("Königreich Spanien", "#a89888"),
   "russland": ("Russisches Reich", "#9aa0a8"),
   "oesterreich_ungarn": ("Österreich-Ungarn", "#a8554a"),
+  # 20./21. Jahrhundert
+  "oesterreich_rep": ("Republik Österreich", "#c08878"),
+  "tschechoslowakei": ("Tschechoslowakei", "#a89878"),
+  "tschechien": ("Tschechien", "#a89878"),
+  "slowakei": ("Slowakei", "#b0a088"),
+  "slowenien": ("Slowenien", "#a0a8a0"),
+  "kroatien_rep": ("Kroatien", "#a0a890"),
+  "polen_2": ("Zweite Polnische Republik", "#9aa48a"),
+  "polen_rep": ("Republik Polen", "#9aa48a"),
+  "ungarn_rep": ("Ungarn", "#a89a78"),
+  "jugoslawien": ("Jugoslawien", "#9aa090"),
+  "danzig": ("Freie Stadt Danzig", "#b0a89a"),
+  "luxemburg_staat": ("Luxemburg", "#b0a87a"),
+  "schweiz": ("Schweiz", "#9a9a92"),
+  "sowjetunion": ("Sowjetunion", "#9a8a8a"),
+  "frankreich_vichy": ("Vichy-Frankreich", "#9a9088"),
+  "kroatien_ns": ("Unabhängiger Staat Kroatien", "#9a9088"),
   "luxemburg": ("Haus Luxemburg", "#b59a5a"),
 }
 for fid, (nm, col) in FOREIGN.items():
     if fid not in FACTIONS:
         FACTIONS[fid] = F(nm, col, foreign=(fid not in ("luxemburg",)))
+
+# Die 16 Bundesländer (für die Epoche „Heute“).
+LAENDER = [
+  ("Baden-Württemberg", "bl_bw", "Stuttgart", "#8a6d3b", "1952 aus Baden und Württemberg gebildet."),
+  ("Bayern", "bl_by", "München", "#5f7a5a", "Größtes Bundesland; Freistaat mit langer eigener Geschichte."),
+  ("Berlin", "bl_be", "Berlin", "#b0724a", "Hauptstadt und Stadtstaat; bis 1990 geteilt."),
+  ("Brandenburg", "bl_bb", "Potsdam", "#6e8a6a", "Umschließt Berlin; Kern der alten Mark Brandenburg."),
+  ("Bremen", "bl_hb", "Bremen", "#7a98a0", "Kleinstes Bundesland; alte Hansestadt (Stadtstaat)."),
+  ("Hamburg", "bl_hh", "Hamburg", "#6a8a8d", "Größter deutscher Hafen; Hansestadt und Stadtstaat."),
+  ("Hessen", "bl_he", "Wiesbaden", "#7c8456", "Finanzzentrum Frankfurt am Main."),
+  ("Mecklenburg-Vorpommern", "bl_mv", "Schwerin", "#6f8f92", "Ostseeland mit Seenplatte; dünn besiedelt."),
+  ("Niedersachsen", "bl_ni", "Hannover", "#94794e", "Flächenmäßig zweitgrößtes Bundesland."),
+  ("Nordrhein-Westfalen", "bl_nw", "Düsseldorf", "#a8724a", "Bevölkerungsreichstes Land; Ruhrgebiet."),
+  ("Rheinland-Pfalz", "bl_rp", "Mainz", "#9c5a52", "Weinland an Rhein und Mosel."),
+  ("Saarland", "bl_sl", "Saarbrücken", "#b06a4e", "1957 als zehntes Land der Bundesrepublik beigetreten."),
+  ("Sachsen", "bl_sn", "Dresden", "#9a7a3b", "Freistaat; Kultur und Industrie (Dresden, Leipzig)."),
+  ("Sachsen-Anhalt", "bl_st", "Magdeburg", "#8a7b5a", "Welterbe in Wittenberg, Dessau und Quedlinburg."),
+  ("Schleswig-Holstein", "bl_sh", "Kiel", "#7a98a0", "Land zwischen Nord- und Ostsee."),
+  ("Thüringen", "bl_th", "Erfurt", "#8c6d4a", "„Grünes Herz“ Deutschlands; Weimar und Wartburg."),
+]
+LAENDER_ID = {nm: fid for nm, fid, cap, col, fact in LAENDER}
+for nm, fid, cap, col, fact in LAENDER:
+    FACTIONS[fid] = F(nm, col, "state", capital=cap,
+                      religion="Christlich geprägt, pluralistisch",
+                      origin="Bundesland der Bundesrepublik Deutschland.",
+                      eras={"2024": {"keyFacts": [fact]}})
 
 
 # ---------------------------------------------------------------------------
@@ -591,6 +701,47 @@ SETTLEMENTS = {
         C("frankfurt","Frankfurt am Main",50.11,8.68,"stadt",2,"deutsches_reich"),
         C("leipzig","Leipzig",51.34,12.37,"stadt",2,"deutsches_reich"),
         C("dresden","Dresden",51.05,13.74,"residenz",2,"deutsches_reich")],
+  1914:[C("berlin","Berlin",52.52,13.40,"residenz",3,"deutsches_reich"),
+        C("wien","Wien",48.21,16.37,"residenz",3,"oesterreich_ungarn"),
+        C("muenchen","München",48.14,11.58,"stadt",2,"deutsches_reich"),
+        C("hamburg","Hamburg",53.55,9.99,"hansestadt",3,"deutsches_reich"),
+        C("koeln","Köln",50.94,6.96,"stadt",2,"deutsches_reich"),
+        C("leipzig","Leipzig",51.34,12.37,"stadt",2,"deutsches_reich")],
+  1919:[C("berlin","Berlin",52.52,13.40,"residenz",3,"deutsches_reich"),
+        C("muenchen","München",48.14,11.58,"stadt",2,"deutsches_reich"),
+        C("hamburg","Hamburg",53.55,9.99,"hansestadt",2,"deutsches_reich"),
+        C("koeln","Köln",50.94,6.96,"stadt",2,"deutsches_reich"),
+        C("danzig","Danzig",54.35,18.65,"hansestadt",2,"danzig")],
+  1938:[C("berlin","Berlin",52.52,13.40,"residenz",3,"ns_reich"),
+        C("wien","Wien",48.21,16.37,"stadt",3,"ns_reich"),
+        C("muenchen","München",48.14,11.58,"stadt",2,"ns_reich"),
+        C("hamburg","Hamburg",53.55,9.99,"hansestadt",2,"ns_reich")],
+  1942:[C("berlin","Berlin",52.52,13.40,"residenz",3,"ns_reich"),
+        C("wien","Wien",48.21,16.37,"stadt",2,"ns_reich"),
+        C("muenchen","München",48.14,11.58,"stadt",2,"ns_reich"),
+        C("prag","Prag",50.09,14.42,"stadt",2,"ns_reich")],
+  1961:[C("bonn","Bonn",50.74,7.10,"residenz",3,"brd"),
+        C("ostberlin","Ost-Berlin",52.52,13.40,"residenz",2,"ddr"),
+        C("hamburg","Hamburg",53.55,9.99,"hansestadt",2,"brd"),
+        C("muenchen","München",48.14,11.58,"stadt",2,"brd"),
+        C("koeln","Köln",50.94,6.96,"stadt",2,"brd"),
+        C("frankfurt","Frankfurt am Main",50.11,8.68,"stadt",2,"brd"),
+        C("leipzig","Leipzig",51.34,12.37,"stadt",2,"ddr"),
+        C("dresden","Dresden",51.05,13.74,"stadt",2,"ddr")],
+  1990:[C("bonn","Bonn",50.74,7.10,"residenz",2,"brd"),
+        C("berlin","Berlin",52.52,13.40,"residenz",3,"ddr"),
+        C("hamburg","Hamburg",53.55,9.99,"hansestadt",2,"brd"),
+        C("muenchen","München",48.14,11.58,"stadt",2,"brd"),
+        C("leipzig","Leipzig",51.34,12.37,"stadt",2,"ddr"),
+        C("dresden","Dresden",51.05,13.74,"stadt",2,"ddr")],
+  2024:[C("berlin","Berlin",52.52,13.40,"residenz",3,"bl_be"),
+        C("muenchen","München",48.14,11.58,"stadt",3,"bl_by"),
+        C("hamburg","Hamburg",53.55,9.99,"hansestadt",3,"bl_hh"),
+        C("koeln","Köln",50.94,6.96,"stadt",2,"bl_nw"),
+        C("frankfurt","Frankfurt am Main",50.11,8.68,"stadt",2,"bl_he"),
+        C("stuttgart","Stuttgart",48.78,9.18,"stadt",2,"bl_bw"),
+        C("dresden","Dresden",51.05,13.74,"stadt",2,"bl_sn"),
+        C("hannover","Hannover",52.37,9.74,"stadt",2,"bl_ni")],
 }
 
 # Kultur-/Sprachzonen (nur Hochmittelalter, durchscheinend).
@@ -625,6 +776,20 @@ ERAS = [
    "Nach Napoleon ordnet der Wiener Kongress Mitteleuropa neu: 39 Staaten bilden den Deutschen Bund unter österreichischem Vorsitz, mit Preußen als Rivalen.", VIEW_MODERN),
   (1871,"1871 — Deutsches Kaiserreich", "clio",
    "Reichsgründung unter preußischer Führung (kleindeutsche Lösung). Österreich bleibt außen vor; Bismarck wird Reichskanzler.", VIEW_MODERN),
+  (1914,"1914 — Vor dem Ersten Weltkrieg", "clio",
+   "Das Kaiserreich auf dem Höhepunkt seiner Macht, verbündet mit Österreich-Ungarn. Im Sommer 1914 beginnt der Erste Weltkrieg.", VIEW_MODERN),
+  (1919,"1919 — Weimarer Republik", "clio",
+   "Nach Niederlage und Revolution wird Deutschland Republik. Der Versailler Vertrag erzwingt große Gebietsverluste; neue Staaten wie Polen, die Tschechoslowakei und Österreich entstehen.", VIEW_MODERN),
+  (1938,"1938 — NS-Staat", "clio",
+   "Unter der NS-Diktatur gliedert das Deutsche Reich Österreich („Anschluss“) und das Sudetenland an. Beginn der aggressiven Expansion vor dem Zweiten Weltkrieg.", VIEW_MODERN),
+  (1942,"1942 — Zweiter Weltkrieg", "clio",
+   "Größte Ausdehnung der deutschen Herrschaft: weite Teile Europas sind besetzt oder annektiert. Eine Zeit von Vernichtungskrieg und Holocaust, die 1945 in der totalen Niederlage endet.", VIEW_MODERN),
+  (1961,"1961 — Geteiltes Deutschland", "clio",
+   "Im Kalten Krieg ist Deutschland geteilt: die Bundesrepublik im Westen, die DDR im Osten. 1961 wird die Berliner Mauer errichtet.", VIEW_MODERN),
+  (1990,"1990 — Wiedervereinigung", "clio",
+   "Nach der Friedlichen Revolution und dem Fall der Mauer (1989) tritt die DDR am 3. Oktober 1990 der Bundesrepublik bei.", VIEW_MODERN),
+  (2024,"Heute — Bundesrepublik Deutschland", "laender",
+   "Das wiedervereinigte Deutschland besteht aus 16 Bundesländern und ist in EU und NATO eingebunden. Tippe ein Bundesland an.", VIEW_MODERN),
 ]
 
 EPS = 0.02  # Vereinfachung (~2 km)
@@ -649,6 +814,28 @@ def load_clio():
     return json.load(open(CLIO_LOCAL))
 
 
+def load_laender():
+    """Bundesländer-Polygone (public domain, deutschlandGeoJSON) als
+    Liste (factionId, Polygon-Liste, Fläche)."""
+    if not os.path.exists(BL_LOCAL):
+        print("  downloading Bundesländer …")
+        data = urllib.request.urlopen(BL_URL, timeout=120).read()
+        with open(BL_LOCAL, "wb") as fh:
+            fh.write(data)
+    gj = json.load(open(BL_LOCAL))
+    out = []
+    for f in gj["features"]:
+        fid = LAENDER_ID.get(f["properties"].get("name"))
+        if not fid:
+            continue
+        geom = process_geometry(f["geometry"], CLIP, EPS)
+        if not geom:
+            continue
+        area = sum(shoelace(poly[0]) for poly in geom)
+        out.append((fid, geom, area))
+    return out
+
+
 def clio_features_for(clio, year):
     feats = []
     for f in clio["features"]:
@@ -667,7 +854,10 @@ def clio_features_for(clio, year):
         fid = NAME_MAP.get(nm)
         if fid is None:
             continue  # Unkartierte (meist ferne) Polities überspringen
-        feats.append((fid, nm, geom, p.get("Area", 0)))
+        # Fläche im Kartenausschnitt (für Z-Reihenfolge), gleiche Einheit wie
+        # die Bundesländer — nicht die globale km²-Angabe aus Cliopatria.
+        area = sum(shoelace(poly[0]) for poly in geom)
+        feats.append((fid, nm, geom, area))
     return feats
 
 
@@ -696,11 +886,18 @@ def build():
         # Territorien sammeln (fid -> Liste von Polygonen)
         byfac = {}
         order = {}  # fid -> Sortierfläche
-        if src == "clio":
+        if src in ("clio", "laender"):
+            # Für „Heute“ (laender) liefert Cliopatria nur die Nachbarn; das
+            # vereinte Deutschland („Federated Republic of Germany“) ist
+            # bewusst nicht kartiert und wird durch Bundesländer ersetzt.
             for fid, nm, geom, area in clio_features_for(clio, year):
                 byfac.setdefault(fid, []).extend(geom)
                 order[fid] = max(order.get(fid, 0), area)
-        else:  # ancient
+        if src == "laender":
+            for fid, geom, area in load_laender():
+                byfac.setdefault(fid, []).extend(geom)
+                order[fid] = max(order.get(fid, 0), area)
+        if src == "ancient":
             for fid, ring in ANCIENT[year]:
                 g = process_geometry({"type": "Polygon", "coordinates": [ring]}, CLIP, EPS)
                 if g:

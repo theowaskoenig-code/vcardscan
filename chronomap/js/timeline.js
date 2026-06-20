@@ -1,10 +1,10 @@
-// Verbindet den durchgehenden Jahres-Schieberegler mit den definierten
-// Snapshots: jedes Jahr wird auf den NÄCHSTGELEGENEN Snapshot abgebildet.
+// Schieberegler über die definierten Epochen. Da die Epochen sehr ungleich
+// über die Zeit verteilt sind (von 100 v. Chr. bis heute), arbeitet der Regler
+// index-basiert: jede Epoche bekommt gleich viel Platz und ist gut anwählbar.
 import { T } from "./i18n.js";
 
 export class Timeline {
-  // snapshots: [{year, file, label}], onChange(entry) wird gerufen, wenn
-  // sich der aufgelöste Snapshot ändert.
+  // snapshots: [{year, file, label}], onChange(entry) bei Epochenwechsel.
   constructor(index, els, onChange) {
     this.snapshots = index.snapshots.slice().sort((a, b) => a.year - b.year);
     this.onChange = onChange;
@@ -12,65 +12,65 @@ export class Timeline {
     this.yearOut = els.yearOut;
     this.labelOut = els.labelOut;
     this.ticks = els.ticks;
-    this.currentYear = null;
+    this.idx = -1;
+    this.tickEls = [];
 
-    const { min, max } = index.yearRange;
-    this.slider.min = String(min);
-    this.slider.max = String(max);
+    this.slider.min = "0";
+    this.slider.max = String(this.snapshots.length - 1);
     this.slider.step = "1";
 
-    this.renderTicks(min, max);
-    this.slider.addEventListener("input", () => this.handleInput());
+    this.renderTicks();
+    this.slider.addEventListener("input", () =>
+      this.updateIndex(parseInt(this.slider.value, 10)));
   }
 
-  renderTicks(min, max) {
+  renderTicks() {
     if (!this.ticks) return;
-    const span = Math.max(1, max - min);
+    const n = this.snapshots.length;
     this.ticks.innerHTML = "";
-    for (const s of this.snapshots) {
+    this.tickEls = this.snapshots.map((s, i) => {
       const tick = document.createElement("button");
       tick.type = "button";
       tick.className = "tl-tick";
-      tick.style.left = ((s.year - min) / span) * 100 + "%";
+      tick.style.left = (n <= 1 ? 0 : (i / (n - 1)) * 100) + "%";
       tick.title = s.label;
-      tick.addEventListener("click", () => this.setYear(s.year, true));
+      tick.addEventListener("click", () => this.setIndex(i));
       this.ticks.appendChild(tick);
-    }
+      return tick;
+    });
   }
 
-  nearest(year) {
-    let best = this.snapshots[0];
-    let bestDist = Infinity;
-    for (const s of this.snapshots) {
+  setIndex(i) {
+    this.slider.value = String(i);
+    this.updateIndex(i);
+  }
+
+  updateIndex(i) {
+    const s = this.snapshots[i];
+    if (!s) return;
+    this.yearOut.textContent = T.yearLabel(s.year);
+    this.labelOut.textContent = s.label;
+    this.tickEls.forEach((t, k) => t.classList.toggle("is-active", k === i));
+    if (this.idx === i) return; // gleicher Snapshot – nichts neu zeichnen
+    this.idx = i;
+    this.onChange(s);
+  }
+
+  nearestIndex(year) {
+    let best = 0, bestDist = Infinity;
+    this.snapshots.forEach((s, i) => {
       const d = Math.abs(s.year - year);
-      if (d < bestDist) { bestDist = d; best = s; }
-    }
+      if (d < bestDist) { bestDist = d; best = i; }
+    });
     return best;
   }
 
-  handleInput() {
-    const year = parseInt(this.slider.value, 10);
-    this.updateYear(year);
-  }
-
-  // Schieber programmatisch setzen (z. B. Klick auf eine Markierung).
-  setYear(year, snapThumb) {
-    if (snapThumb) this.slider.value = String(year);
-    this.updateYear(year);
-  }
-
-  updateYear(year) {
-    this.yearOut.textContent = T.yearLabel(year);
-    const entry = this.nearest(year);
-    this.labelOut.textContent = entry.label;
-    if (this.currentYear === entry.year) return; // gleicher Snapshot – nichts neu zeichnen
-    this.currentYear = entry.year;
-    this.onChange(entry);
-  }
-
+  // Öffentliche API: nach Jahr starten/springen (auf nächste Epoche gerundet).
   start(year) {
-    const y = (typeof year === "number") ? year : this.snapshots[0].year;
-    this.slider.value = String(y);
-    this.updateYear(y);
+    this.setIndex(typeof year === "number" ? this.nearestIndex(year) : 0);
+  }
+
+  setYear(year) {
+    this.setIndex(this.nearestIndex(year));
   }
 }
