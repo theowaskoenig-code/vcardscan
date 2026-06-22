@@ -21,7 +21,7 @@ Geschichtsliteratur. Grenzen ausdrücklich vereinfacht.
 Benötigt die Cliopatria-Datei lokal (wird bei Bedarf heruntergeladen):
   /tmp/clio_out/cliopatria_polities_only.geojson
 """
-import json, os, math, urllib.request, zipfile, io
+import json, os, math, re, zlib, urllib.request, zipfile, io
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
@@ -30,12 +30,18 @@ CLIO_URL = "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cli
 BL_LOCAL = "/tmp/bl.geojson"
 BL_URL = "https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/4_niedrig.geo.json"
 
-# Anzeige-/Clip-Fenster (Mitteleuropa).
-CLIP = (-1.0, 43.0, 23.0, 57.5)   # minx,miny,maxx,maxy
-VIEW_MED = [[46.0, 4.0], [56.0, 19.5]]
-VIEW_MED_E = [[46.0, 4.0], [56.5, 21.8]]   # weiter nach Osten (zeigt ganz Preußen)
-VIEW_ANCIENT = [[43.5, 2.0], [56.0, 20.0]]
-VIEW_MODERN = [[46.5, 4.0], [56.0, 21.0]]
+# Anzeige-/Clip-Fenster.
+CLIP_DE = (-1.0, 43.0, 23.0, 57.5)        # Mitteleuropa (Cliopatria-/Bundesländer-Overlay)
+EUROPE_CLIP = (-25.0, 34.0, 45.0, 71.0)   # ganz Europa (Hauptquelle historical-basemaps)
+VIEW_EUROPE = [[34.5, -11.0], [65.0, 39.0]]
+VIEW_CEUROPE = [[43.0, -5.0], [58.5, 27.0]]   # Mitteleuropa (Detail-Epochen)
+
+# Externe Datenquellen (werden bei Bedarf geladen und in /tmp gecacht).
+HB_DIR = "/tmp/hb_cache"
+HB_URL = "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_%s.geojson"
+NE_DIR = "/tmp/ne_cache"
+NE_LAND_URL = "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/50m/physical/ne_50m_land.json"
+NE_LAKES_URL = "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/50m/physical/ne_50m_lakes.json"
 
 
 # ---------------------------------------------------------------------------
@@ -534,22 +540,22 @@ NAME_MAP = {
 
 # Zusätzliche (meist ausländische) Fraktionen, knapp gehalten.
 FOREIGN = {
-  "frankreich": ("Königreich Frankreich", "#8a98a8"),
+  "frankreich": ("Frankreich", "#8a98a8"),
   "frankreich_rep": ("Französische Republik", "#8a98a8"),
-  "polen": ("Königreich Polen", "#9aa48a"),
+  "polen": ("Polen", "#9aa48a"),
   "polen_litauen": ("Polen-Litauen", "#9aa48a"),
   "schlesien": ("Schlesische Herzogtümer", "#9a8a6a"),
-  "ungarn": ("Königreich Ungarn", "#a89a78"),
-  "daenemark": ("Königreich Dänemark", "#7a98a0"),
+  "ungarn": ("Ungarn", "#a89a78"),
+  "daenemark": ("Dänemark", "#7a98a0"),
   "kalmar": ("Kalmarer Union", "#7a98a0"),
-  "schweden": ("Schwedisches Reich", "#8aa0a8"),
+  "schweden": ("Schweden", "#8aa0a8"),
   "schweden_norwegen": ("Schweden-Norwegen", "#8aa0a8"),
   "norwegen": ("Königreich Norwegen", "#8aa0a8"),
   "osmanen": ("Osmanisches Reich", "#a88a7a"),
   "venedig": ("Republik Venedig", "#a094a8"),
   "genua": ("Republik Genua", "#a094a8"),
   "mailand": ("Herzogtum Mailand", "#a094a8"),
-  "italien": ("Königreich Italien", "#a094a8"),
+  "italien": ("Italien", "#a094a8"),
   "lothringen_hzm": ("Herzogtum Lothringen", "#9a8a8a"),
   "arelat": ("Königreich Arelat (Burgund)", "#9a8a6a"),
   "burgund_frei": ("Freigrafschaft Burgund", "#9a8a6a"),
@@ -560,8 +566,8 @@ FOREIGN = {
   "aquileia": ("Patriarchat Aquileia", "#a094a8"),
   "niederlande": ("Niederlande", "#8a9aa0"),
   "belgien": ("Königreich Belgien", "#8a9aa0"),
-  "spanien": ("Königreich Spanien", "#a89888"),
-  "russland": ("Russisches Reich", "#9aa0a8"),
+  "spanien": ("Spanien", "#a89888"),
+  "russland": ("Russland", "#9aa0a8"),
   "oesterreich_ungarn": ("Österreich-Ungarn", "#a8554a"),
   # 20./21. Jahrhundert
   "oesterreich_rep": ("Republik Österreich", "#c08878"),
@@ -702,7 +708,7 @@ SETTLEMENTS = {
         C("hamburg","Hamburg",53.55,9.99,"hansestadt",2,"deutscher_bund"),
         C("koeln","Köln",50.94,6.96,"stadt",2,"preussen"),
         C("stuttgart","Stuttgart",48.78,9.18,"residenz",2,"wuerttemberg_kgr")],
-  1871:[C("berlin","Berlin",52.52,13.40,"residenz",3,"deutsches_reich"),
+  1880:[C("berlin","Berlin",52.52,13.40,"residenz",3,"deutsches_reich"),
         C("wien","Wien",48.21,16.37,"residenz",3,"oesterreich_ungarn"),
         C("muenchen","München",48.14,11.58,"residenz",2,"deutsches_reich"),
         C("hamburg","Hamburg",53.55,9.99,"hansestadt",3,"deutsches_reich"),
@@ -716,7 +722,7 @@ SETTLEMENTS = {
         C("hamburg","Hamburg",53.55,9.99,"hansestadt",3,"deutsches_reich"),
         C("koeln","Köln",50.94,6.96,"stadt",2,"deutsches_reich"),
         C("leipzig","Leipzig",51.34,12.37,"stadt",2,"deutsches_reich")],
-  1919:[C("berlin","Berlin",52.52,13.40,"residenz",3,"deutsches_reich"),
+  1920:[C("berlin","Berlin",52.52,13.40,"residenz",3,"deutsches_reich"),
         C("muenchen","München",48.14,11.58,"stadt",2,"deutsches_reich"),
         C("hamburg","Hamburg",53.55,9.99,"hansestadt",2,"deutsches_reich"),
         C("koeln","Köln",50.94,6.96,"stadt",2,"deutsches_reich"),
@@ -729,7 +735,7 @@ SETTLEMENTS = {
         C("wien","Wien",48.21,16.37,"stadt",2,"ns_reich"),
         C("muenchen","München",48.14,11.58,"stadt",2,"ns_reich"),
         C("prag","Prag",50.09,14.42,"stadt",2,"ns_reich")],
-  1961:[C("bonn","Bonn",50.74,7.10,"residenz",3,"brd"),
+  1960:[C("bonn","Bonn",50.74,7.10,"residenz",3,"brd"),
         C("ostberlin","Ost-Berlin",52.52,13.40,"residenz",2,"ddr"),
         C("hamburg","Hamburg",53.55,9.99,"hansestadt",2,"brd"),
         C("muenchen","München",48.14,11.58,"stadt",2,"brd"),
@@ -743,7 +749,7 @@ SETTLEMENTS = {
         C("muenchen","München",48.14,11.58,"stadt",2,"brd"),
         C("leipzig","Leipzig",51.34,12.37,"stadt",2,"ddr"),
         C("dresden","Dresden",51.05,13.74,"stadt",2,"ddr")],
-  2024:[C("berlin","Berlin",52.52,13.40,"residenz",3,"bl_be"),
+  2000:[C("berlin","Berlin",52.52,13.40,"residenz",3,"bl_be"),
         C("muenchen","München",48.14,11.58,"stadt",3,"bl_by"),
         C("hamburg","Hamburg",53.55,9.99,"hansestadt",3,"bl_hh"),
         C("koeln","Köln",50.94,6.96,"stadt",2,"bl_nw"),
@@ -763,42 +769,55 @@ LANG_ZONES = [
    "note":"Westslawische Restbevölkerung in der Lausitz.","ring":[[13.4,50.9],[13.3,51.9],[14.0,52.0],[14.8,51.4],[14.5,50.9],[13.4,50.9]]},
 ]
 
-# Epochen-Definitionen.
+# Epochen-Definitionen: (Anzeigejahr, Label, HB-Quelljahr, Overlay, View, Blurb).
+# Overlay: None | "clio" (deutsches Detail aus Cliopatria) | "laender".
 ERAS = [
-  (-100,"Um 100 v. Chr. — Kelten & Germanen", "ancient",
-   "Vor der römischen Expansion: keltische Stämme der La-Tène-Kultur im Süden und Westen, germanische Stämme im Norden. Die Boier geben Böhmen seinen Namen.", VIEW_ANCIENT),
-  (100,"Um 100 n. Chr. — Römisches Reich & Limes", "ancient",
-   "Rom sichert die Grenze entlang von Rhein und Donau (Limes). Westlich und südlich liegen die Provinzen mit Städten wie Köln und Trier; östlich beginnt das freie Germanien.", VIEW_ANCIENT),
-  (500,"Um 500 — Völkerwanderung", "ancient",
-   "Nach dem Untergang Westroms entstehen germanische Reiche: die Franken unter Chlodwig, dazu Sachsen, Thüringer, Alemannen, Burgunden und das Ostgotenreich Theoderichs.", VIEW_ANCIENT),
-  (1000,"Um 1000 — Ottonisches Reich", "clio",
-   "Das ottonische Reich gliedert sich in die großen Stammesherzogtümer. Kaiser Otto III. träumt von der Erneuerung des Römischen Reiches.", VIEW_MED),
-  (1200,"Um 1200 — Stauferzeit", "clio",
-   "Unter den Staufern erreicht das Reich seine größte Ausdehnung. Neue Mächte wie das Königreich Böhmen treten hervor.", VIEW_MED),
-  (1356,"Goldene Bulle (1356)", "clio",
-   "Karl IV. erlässt die Goldene Bulle: Sieben Kurfürsten wählen fortan den König. Das Reich ist ein Flickenteppich aus Hunderten Territorien — im Nordosten der Deutschordensstaat in Preußen.", VIEW_MED_E),
-  (1500,"Um 1500 — Reichsreform", "clio",
-   "An der Schwelle zur Neuzeit: Reichsreform unter Maximilian I., Aufstieg der Habsburger, faktische Unabhängigkeit der Eidgenossenschaft.", VIEW_MED_E),
-  (1648,"1648 — Westfälischer Friede", "clio",
-   "Das Ende des Dreißigjährigen Krieges. Die Reichsstände werden faktisch souverän; Brandenburg-Preußen und das wettinische Sachsen steigen auf.", VIEW_MED),
-  (1815,"1815 — Deutscher Bund", "clio",
-   "Nach Napoleon ordnet der Wiener Kongress Mitteleuropa neu: 39 Staaten bilden den Deutschen Bund unter österreichischem Vorsitz, mit Preußen als Rivalen.", VIEW_MODERN),
-  (1871,"1871 — Deutsches Kaiserreich", "clio",
-   "Reichsgründung unter preußischer Führung (kleindeutsche Lösung). Österreich bleibt außen vor; Bismarck wird Reichskanzler.", VIEW_MODERN),
-  (1914,"1914 — Vor dem Ersten Weltkrieg", "clio",
-   "Das Kaiserreich auf dem Höhepunkt seiner Macht, verbündet mit Österreich-Ungarn. Im Sommer 1914 beginnt der Erste Weltkrieg.", VIEW_MODERN),
-  (1919,"1919 — Weimarer Republik", "clio",
-   "Nach Niederlage und Revolution wird Deutschland Republik. Der Versailler Vertrag erzwingt große Gebietsverluste; neue Staaten wie Polen, die Tschechoslowakei und Österreich entstehen.", VIEW_MODERN),
-  (1938,"1938 — NS-Staat", "clio",
-   "Unter der NS-Diktatur gliedert das Deutsche Reich Österreich („Anschluss“) und das Sudetenland an. Beginn der aggressiven Expansion vor dem Zweiten Weltkrieg.", VIEW_MODERN),
-  (1942,"1942 — Zweiter Weltkrieg", "clio",
-   "Größte Ausdehnung der deutschen Herrschaft: weite Teile Europas sind besetzt oder annektiert. Eine Zeit von Vernichtungskrieg und Holocaust, die 1945 in der totalen Niederlage endet.", VIEW_MODERN),
-  (1961,"1961 — Geteiltes Deutschland", "clio",
-   "Im Kalten Krieg ist Deutschland geteilt: die Bundesrepublik im Westen, die DDR im Osten. 1961 wird die Berliner Mauer errichtet.", VIEW_MODERN),
-  (1990,"1990 — Wiedervereinigung", "clio",
-   "Nach der Friedlichen Revolution und dem Fall der Mauer (1989) tritt die DDR am 3. Oktober 1990 der Bundesrepublik bei.", VIEW_MODERN),
-  (2024,"Heute — Bundesrepublik Deutschland", "laender",
-   "Das wiedervereinigte Deutschland besteht aus 16 Bundesländern und ist in EU und NATO eingebunden. Tippe ein Bundesland an.", VIEW_MODERN),
+  (-500,"Um 500 v. Chr. — Kelten & frühe Völker","bc500",None,VIEW_EUROPE,
+   "Vor Rom und den großen Wanderungen: keltische Kulturen prägen weite Teile West- und Mitteleuropas, im Norden frühe germanische Stämme."),
+  (-200,"Um 200 v. Chr. — Kelten & Germanen","bc200",None,VIEW_EUROPE,
+   "Die keltische La-Tène-Kultur ist auf ihrem Höhepunkt; aus dem Norden drängen germanische Stämme nach Süden, Rom wächst im Mittelmeerraum."),
+  (-1,"Um Christi Geburt — Rom & Germanien","bc1",None,VIEW_EUROPE,
+   "Das Römische Reich reicht bis an Rhein und Donau. Östlich davon liegt das freie Germanien; 9 n. Chr. stoppt die Varusschlacht die römische Expansion."),
+  (200,"Um 200 — Römisches Reich","200",None,VIEW_EUROPE,
+   "Die Pax Romana: Rom beherrscht den Mittelmeerraum, die Grenze (Limes) verläuft an Rhein und Donau, dahinter die germanischen Stämme."),
+  (400,"Um 400 — Spätantike","400",None,VIEW_EUROPE,
+   "Das Römische Reich ist geteilt und unter Druck. Germanische Verbände wandern ins Reich; das Zeitalter der Völkerwanderung beginnt."),
+  (500,"Um 500 — Völkerwanderung","500",None,VIEW_EUROPE,
+   "Nach dem Untergang Westroms entstehen germanische Reiche: Franken, Westgoten, Ostgoten, dazu Sachsen, Thüringer und Alemannen."),
+  (700,"Um 700 — Fränkisches Reich","700",None,VIEW_EUROPE,
+   "Das Frankenreich der Merowinger wird zur beherrschenden Macht westlich des Rheins und dehnt sich nach Germanien aus."),
+  (800,"800 — Karl der Große","800",None,VIEW_EUROPE,
+   "Karl der Große eint weite Teile West- und Mitteleuropas; 800 wird er zum Kaiser gekrönt — eine Wurzel des späteren Heiligen Römischen Reiches."),
+  (1000,"Um 1000 — Ottonisches Reich","1000",None,VIEW_CEUROPE,
+   "Das ottonische Reich gliedert sich in große Stammesherzogtümer. Kaiser Otto III. träumt von der Erneuerung des Römischen Reiches."),
+  (1200,"Um 1200 — Stauferzeit","1200",None,VIEW_CEUROPE,
+   "Unter den Staufern erreicht das Reich seine größte Ausdehnung; neue Mächte wie das Königreich Böhmen treten hervor."),
+  (1356,"1356 — Goldene Bulle","1400","clio",VIEW_CEUROPE,
+   "Karl IV. erlässt die Goldene Bulle: Sieben Kurfürsten wählen fortan den König. Das Reich ist ein Flickenteppich aus Hunderten Territorien — im Nordosten der Deutschordensstaat."),
+  (1500,"Um 1500 — Reichsreform","1500","clio",VIEW_CEUROPE,
+   "An der Schwelle zur Neuzeit: Reichsreform unter Maximilian I., Aufstieg der Habsburger, faktische Unabhängigkeit der Eidgenossenschaft."),
+  (1648,"1648 — Westfälischer Friede","1650","clio",VIEW_CEUROPE,
+   "Das Ende des Dreißigjährigen Krieges. Die Reichsstände werden faktisch souverän; Brandenburg-Preußen und Sachsen steigen auf."),
+  (1700,"Um 1700 — Barock & Aufstieg Preußens","1700",None,VIEW_CEUROPE,
+   "Im Zeitalter des Barock ringen Habsburg, Frankreich und das aufstrebende Brandenburg-Preußen um Vormacht in Mitteleuropa."),
+  (1789,"1789 — Vor der Französischen Revolution","1783",None,VIEW_EUROPE,
+   "Das Alte Reich am Vorabend der Französischen Revolution, die ganz Europa umstürzen wird."),
+  (1815,"1815 — Deutscher Bund","1815",None,VIEW_CEUROPE,
+   "Nach Napoleon ordnet der Wiener Kongress Mitteleuropa neu: 39 Staaten bilden den Deutschen Bund unter österreichischem Vorsitz, mit Preußen als Rivalen."),
+  (1880,"Um 1880 — Deutsches Kaiserreich","1880",None,VIEW_CEUROPE,
+   "1871 unter preußischer Führung gegründet (kleindeutsche Lösung); Österreich bleibt außen vor. Bismarck prägt die Politik."),
+  (1914,"1914 — Erster Weltkrieg","1914",None,VIEW_EUROPE,
+   "Das Kaiserreich auf dem Höhepunkt seiner Macht, verbündet mit Österreich-Ungarn. 1914 beginnt der Erste Weltkrieg."),
+  (1920,"1920 — Weimarer Republik","1920",None,VIEW_CEUROPE,
+   "Nach Niederlage und Revolution wird Deutschland Republik. Der Versailler Vertrag erzwingt große Gebietsverluste; neue Staaten wie Polen und die Tschechoslowakei entstehen."),
+  (1938,"1938 — NS-Staat","1938",None,VIEW_EUROPE,
+   "Unter der NS-Diktatur gliedert das Deutsche Reich Österreich („Anschluss“) und das Sudetenland an — aggressive Expansion vor dem Zweiten Weltkrieg."),
+  (1945,"1945 — Kriegsende & Besatzung","1945",None,VIEW_CEUROPE,
+   "Nach der totalen Niederlage wird Deutschland von den Siegermächten besetzt und verliert die Gebiete östlich von Oder und Neiße."),
+  (1960,"1960 — Geteiltes Deutschland","1960",None,VIEW_CEUROPE,
+   "Im Kalten Krieg ist Deutschland geteilt: die Bundesrepublik im Westen, die DDR im Osten; 1961 wird die Berliner Mauer errichtet."),
+  (2000,"Heute — Bundesrepublik Deutschland","2000","laender",VIEW_CEUROPE,
+   "Das wiedervereinigte Deutschland besteht aus 16 Bundesländern und ist in EU und NATO eingebunden. Tippe ein Bundesland an."),
 ]
 
 EPS = 0.02  # Vereinfachung (~2 km)
@@ -837,7 +856,7 @@ def load_laender():
         fid = LAENDER_ID.get(f["properties"].get("name"))
         if not fid:
             continue
-        geom = process_geometry(f["geometry"], CLIP, EPS)
+        geom = process_geometry(f["geometry"], CLIP_DE, EPS)
         if not geom:
             continue
         area = sum(shoelace(poly[0]) for poly in geom)
@@ -857,7 +876,7 @@ def clio_features_for(clio, year):
         fy, ty = p.get("FromYear"), p.get("ToYear")
         if fy is None or ty is None or not (fy <= year <= ty):
             continue
-        geom = process_geometry(f.get("geometry"), CLIP, EPS)
+        geom = process_geometry(f.get("geometry"), CLIP_DE, EPS)
         if not geom:
             continue
         fid = NAME_MAP.get(nm)
@@ -882,47 +901,217 @@ def to_feature(fid, geom_polys):
     return {"type": "Feature", "properties": props, "geometry": geometry}
 
 
+# ---------------------------------------------------------------------------
+# historical-basemaps (GPL): europaweite Hauptquelle für alle Epochen.
+# Namen werden auf bestehende (kuratierte) Fraktionen abgebildet; alles
+# Übrige bekommt automatisch eine Fraktion mit stabiler Farbe.
+# ---------------------------------------------------------------------------
+WARM = ["#8a6d3b","#6e7d4a","#9c5a52","#7c8456","#94794e","#5f7a5a","#8c6d4a",
+        "#a8724a","#7a5230","#8a7b5a","#6e6240","#9a7a3b","#b06a4e","#7c6a4a"]
+COOL = ["#8a98a8","#9aa48a","#a89a78","#7a98a0","#9a8a8a","#a094a8","#9aa090",
+        "#8a9aa0","#a0a890","#9a9a92","#aab0b8","#9a8a6a","#a89888","#8a9a9a"]
+
+# HB-Name -> deutsche Anzeige (für automatisch erzeugte Fraktionen).
+DE_NAMES = {
+  "England":"England","Kingdom of England":"England","Scotland":"Schottland",
+  "Ireland":"Irland","Great Britain":"Großbritannien","United Kingdom":"Vereinigtes Königreich",
+  "Wales":"Wales","Portugal":"Portugal","Kingdom of Portugal":"Portugal",
+  "Spain":"Spanien","Castile":"Kastilien","Aragon":"Aragón","Granada":"Granada",
+  "Papal States":"Kirchenstaat","Naples":"Neapel","Kingdom of Naples":"Königreich Neapel",
+  "Sicily":"Sizilien","Kingdom of Sicily":"Königreich Sizilien","Tuscany":"Toskana",
+  "Florence":"Florenz","Byzantine Empire":"Byzantinisches Reich","Eastern Roman Empire":"Oströmisches Reich",
+  "Bulgaria":"Bulgarien","Serbia":"Serbien","Bosnia":"Bosnien","Wallachia":"Walachei",
+  "Moldavia":"Moldau","Greece":"Griechenland","Kievan Rus":"Kiewer Rus","Kievan Rus'":"Kiewer Rus",
+  "Novgorod":"Nowgorod","Lithuania":"Litauen","Grand Duchy of Lithuania":"Großfürstentum Litauen",
+  "Ukraine":"Ukraine","Belarus":"Belarus","Finland":"Finnland","Norway":"Norwegen",
+  "Kingdom of Norway":"Norwegen","Iceland":"Island","Hanover":"Hannover","Hannover":"Hannover",
+  "Brunswick":"Braunschweig","Mecklenburg":"Mecklenburg","Mecklenburg-Schwerin":"Mecklenburg-Schwerin",
+  "Mecklenburg-Strelitz":"Mecklenburg-Strelitz","Oldenburg":"Oldenburg","Nassau":"Nassau",
+  "Holstein":"Holstein","Schleswig":"Schleswig","Thuringia":"Thüringen","Anhalt":"Anhalt",
+  "Lippe-Detmold":"Lippe-Detmold","Schaumburg-Lippe":"Schaumburg-Lippe","Waldeck":"Waldeck",
+  "Electoral Hesse":"Kurhessen","Grand Duchy of Hesse":"Großherzogtum Hessen","Hesse":"Hessen",
+  "Hohenzollern":"Hohenzollern","Bremen":"Bremen","Hamburg":"Hamburg","Lübeck":"Lübeck",
+  "Frankfurt":"Frankfurt","Vandals":"Vandalen","Lombards":"Langobarden","Huns":"Hunnen",
+  "Avars":"Awaren","Gepids":"Gepiden","Suebi":"Sueben","Visigoths":"Westgoten",
+  "Magyars":"Magyaren","Crimean Khanate":"Krim-Khanat","Golden Horde":"Goldene Horde",
+  "Croatia":"Kroatien","Czechoslovakia":"Tschechoslowakei","Yugoslavia":"Jugoslawien",
+  "Czech Republic":"Tschechien","Czechia":"Tschechien","Slovakia":"Slowakei","Slovenia":"Slowenien","Austria":"Österreich","Turkey":"Türkei","Russia":"Russland","Spain":"Spanien",
+  "Romania":"Rumänien","Estonia":"Estland","Latvia":"Lettland","Free City of Danzig":"Freie Stadt Danzig",
+  "Marcomanni":"Markomannen","Cherusci":"Cherusker","Celts":"Kelten","Gauls":"Gallier",
+  "Franche-Comté":"Freigrafschaft Burgund","Cuxhaven":"Cuxhaven","Wetzlar":"Wetzlar",
+}
+
+# Als „deutsche Lande“ (warm, hervorgehoben) behandelte HB-Namen.
+GERMAN_SET = {
+  "Holy Roman Empire","Prussia","Kingdom of Prussia","Bavaria","Kingdom of Bavaria",
+  "Duchy of Bavaria","Saxony","Kingdom of Saxony","Electorate of Saxony","Baden",
+  "Grand Duchy of Baden","Württemberg","Kingdom of Württemberg","Hanover","Hannover",
+  "Brunswick","Mecklenburg","Mecklenburg-Schwerin","Mecklenburg-Strelitz","Oldenburg",
+  "Nassau","Holstein","Schleswig","Thuringia","Anhalt","Lippe-Detmold","Schaumburg-Lippe",
+  "Waldeck","Electoral Hesse","Grand Duchy of Hesse","Hesse","Hohenzollern","Bremen",
+  "Hamburg","Lübeck","Frankfurt","Palatinate","Brandenburg","Electorate of Brandenburg",
+  "Mainz","Cologne","Trier","Teutonic Order","German Empire","German Confederation",
+  "Weimar Republic","Nazi Germany","West Germany","East Germany","Germany",
+  "Federal Republic of Germany","German Democratic Republic","Cuxhaven","Wetzlar",
+  "Franks","Saxons","Alamans","Alemanni","Burgunds","Burgundians","Ostrogoths",
+  "Turingians","Thuringians","Suebi","Marcomanni","Cherusci","Lombards",
+}
+
+SKIP_NAMES = {"", "?", "Arctic marine mammal hunters"}
+
+# HB-Name -> bestehende (kuratierte) Fraktions-ID.
+HB_MAP = {
+  "Holy Roman Empire":"hre",
+  "Kingdom of Bohemia":"boehmen","Bohemia":"boehmen","Duchy of Bohemia":"boehmen",
+  "Prussia":"preussen","Kingdom of Prussia":"preussen",
+  "Bavaria":"bayern_kgr","Kingdom of Bavaria":"bayern_kgr","Duchy of Bavaria":"bayern",
+  "Saxony":"sachsen_kur","Electorate of Saxony":"sachsen_kur","Kingdom of Saxony":"sachsen_kur",
+  "Baden":"baden","Grand Duchy of Baden":"baden",
+  "Württemberg":"wuerttemberg_kgr","Kingdom of Württemberg":"wuerttemberg_kgr",
+  "Austrian Empire":"oesterreich_kaisertum","Austria-Hungary":"oesterreich_ungarn",
+  "Austria":"oesterreich_rep","Habsburg Monarchy":"habsburg",
+  "German Empire":"deutsches_reich","German Confederation":"deutscher_bund",
+  "Nazi Germany":"ns_reich","Weimar Republic":"deutsches_reich",
+  "West Germany":"brd","Federal Republic of Germany":"brd",
+  "East Germany":"ddr","German Democratic Republic":"ddr",
+  "Teutonic Order":"deutschorden","Palatinate":"pfalz","Brandenburg":"brandenburg",
+  "Electorate of Brandenburg":"brandenburg","Mainz":"mainz","Cologne":"koeln","Trier":"trier",
+  "Franks":"franken_v","Saxons":"sachsen_v","Alamans":"alemannen_v","Alemanni":"alemannen_v",
+  "Burgunds":"burgunden","Burgundians":"burgunden","Ostrogoths":"ostgoten",
+  "Turingians":"thueringer_v","Thuringians":"thueringer_v",
+  "Roman Empire":"roemer","Roman Republic":"roemer","Western Roman Empire":"weibrom",
+  "France":"frankreich","Kingdom of France":"frankreich",
+  "Kingdom of Hungary":"ungarn","Hungary":"ungarn",
+  "Kingdom of Poland":"polen","Poland":"polen","Poland-Lithuania":"polen_litauen",
+  "Polish-Lithuanian Commonwealth":"polen_litauen",
+  "Denmark":"daenemark","Denmark-Norway":"daenemark","Kingdom of Denmark":"daenemark",
+  "Sweden":"schweden","Kingdom of Sweden":"schweden","Swedish Empire":"schweden",
+  "Kalmar Union":"kalmar","Ottoman Empire":"osmanen",
+  "Venice":"venedig","Republic of Venice":"venedig","Genoa":"genua","Republic of Genoa":"genua",
+  "Milan":"mailand","Duchy of Milan":"mailand","Dutch Republic":"niederlande",
+  "Netherlands":"niederlande","United Provinces":"niederlande",
+  "Switzerland":"eidgenossenschaft","Swiss Confederation":"eidgenossenschaft",
+  "Russia":"russland","Russian Empire":"russland","Soviet Union":"sowjetunion","USSR":"sowjetunion",
+  "Spain":"spanien","Kingdom of Spain":"spanien","Italy":"italien","Kingdom of Italy":"italien",
+  "Lorraine":"lothringen_hzm","Duchy of Lorraine":"lothringen_hzm",
+  "Savoy":"savoyen","Duchy of Savoy":"savoyen","County of Savoy":"savoyen",
+  "Franche-Comté":"burgund_frei","Luxembourg":"luxemburg_staat",
+  "Kingdom of Croatia":"kroatien","Belgium":"belgien","Kingdom of Belgium":"belgien",
+}
+
+
+def _slug(name):
+    s = name.lower().replace("ä","ae").replace("ö","oe").replace("ü","ue").replace("ß","ss")
+    s = re.sub(r"[^a-z0-9]+", "_", s).strip("_")
+    return s or "x"
+
+
+def hb_faction(name):
+    fid = HB_MAP.get(name)
+    if fid:
+        return fid
+    fid = "hb_" + _slug(name)
+    if fid not in FACTIONS:
+        german = name in GERMAN_SET
+        pal = WARM if german else COOL
+        col = pal[zlib.crc32(name.encode("utf-8")) % len(pal)]
+        FACTIONS[fid] = {"name": DE_NAMES.get(name, name), "color": col,
+                         "foreign": (not german)}
+    return fid
+
+
+def load_ne(url, fname):
+    path = os.path.join(NE_DIR, fname)
+    if not os.path.exists(path):
+        print(f"  downloading {fname} (Natural Earth) …")
+        os.makedirs(NE_DIR, exist_ok=True)
+        with open(path, "wb") as fh:
+            fh.write(urllib.request.urlopen(url, timeout=180).read())
+    return json.load(open(path))
+
+
+def build_geo():
+    print("  building Europe land base (Natural Earth 50m) …")
+    for url, cache, out, eps in [(NE_LAND_URL, "land.json", "geo/land.geojson", 0.05),
+                                 (NE_LAKES_URL, "lakes.json", "geo/lakes.geojson", 0.05)]:
+        gj = load_ne(url, cache)
+        feats = []
+        for f in gj["features"]:
+            g = process_geometry(f.get("geometry"), EUROPE_CLIP, eps)
+            if not g:
+                continue
+            geom = ({"type": "MultiPolygon", "coordinates": g} if len(g) != 1
+                    else {"type": "Polygon", "coordinates": g[0]})
+            feats.append({"type": "Feature", "properties": {}, "geometry": geom})
+        sz = write(out, {"type": "FeatureCollection", "features": feats})
+        print(f"    {out}: {len(feats)} features ({sz} bytes)")
+
+
+def load_hb(key):
+    path = os.path.join(HB_DIR, f"world_{key}.geojson")
+    if not os.path.exists(path):
+        os.makedirs(HB_DIR, exist_ok=True)
+        with open(path, "wb") as fh:
+            fh.write(urllib.request.urlopen(HB_URL % key, timeout=180).read())
+    return json.load(open(path))
+
+
+def hb_features_for(hb, skip):
+    out = []
+    for f in hb["features"]:
+        nm = (f["properties"].get("NAME") or "").strip()
+        if nm in SKIP_NAMES or nm in skip:
+            continue
+        geom = process_geometry(f.get("geometry"), EUROPE_CLIP, EPS)
+        if not geom:
+            continue
+        fid = hb_faction(nm)
+        area = sum(shoelace(poly[0]) for poly in geom)
+        out.append((fid, nm, geom, area))
+    return out
+
+
 def build():
-    print("Building ChronoMap data v2 …")
+    print("Building ChronoMap data v3 (Europe-wide, multi-source) …")
+    build_geo()
     clio = load_clio()
 
-    index = {"schemaVersion": 2, "title": "ChronoMap Deutschland",
+    index = {"schemaVersion": 3, "title": "ChronoMap Deutschland",
              "yearRange": {"min": ERAS[0][0], "max": ERAS[-1][0]},
              "snapshots": []}
-    used_factions = set()
 
-    for year, label, src, blurb, view in ERAS:
-        # Territorien sammeln (fid -> Liste von Polygonen)
-        byfac = {}
-        order = {}  # fid -> Sortierfläche
-        if src in ("clio", "laender"):
-            # Für „Heute“ (laender) liefert Cliopatria nur die Nachbarn; das
-            # vereinte Deutschland („Federated Republic of Germany“) ist
-            # bewusst nicht kartiert und wird durch Bundesländer ersetzt.
+    for year, label, hbkey, overlay, view, blurb in ERAS:
+        byfac, order = {}, {}
+
+        # Beim Overlay die deutsche Großfläche aus HB weglassen (Detail kommt
+        # aus Cliopatria bzw. den Bundesländern).
+        skip = set()
+        if overlay == "clio":
+            skip = {"Holy Roman Empire"}
+        elif overlay == "laender":
+            skip = {"Germany", "West Germany", "East Germany", "German Empire",
+                    "Federal Republic of Germany", "German Democratic Republic"}
+
+        def add(fid, geom, area):
+            byfac.setdefault(fid, []).extend(geom)
+            order[fid] = max(order.get(fid, 0), area)
+
+        for fid, nm, geom, area in hb_features_for(load_hb(hbkey), skip):
+            add(fid, geom, area)
+        if overlay == "clio":
             for fid, nm, geom, area in clio_features_for(clio, year):
-                byfac.setdefault(fid, []).extend(geom)
-                order[fid] = max(order.get(fid, 0), area)
-        if src == "laender":
+                add(fid, geom, area)
+        elif overlay == "laender":
             for fid, geom, area in load_laender():
-                byfac.setdefault(fid, []).extend(geom)
-                order[fid] = max(order.get(fid, 0), area)
-        if src == "ancient":
-            for fid, ring in ANCIENT[year]:
-                g = process_geometry({"type": "Polygon", "coordinates": [ring]}, CLIP, EPS)
-                if g:
-                    byfac.setdefault(fid, []).extend(g)
-                    order[fid] = max(order.get(fid, 0), shoelace(simplify_ring(clip_ring(ring, CLIP), EPS)))
+                add(fid, geom, area)
 
-        # Features in Reihenfolge große -> kleine Fläche (z-Reihenfolge)
+        # Große Flächen zuerst (z-Reihenfolge), kleine Detail-Territorien oben.
         fids_sorted = sorted(byfac.keys(), key=lambda k: order.get(k, 0), reverse=True)
         features = [to_feature(fid, byfac[fid]) for fid in fids_sorted]
-        used_factions.update(byfac.keys())
 
-        # factionIds für die Liste: deutsche Lande zuerst, dann Nachbarn,
-        # jeweils nach Fläche absteigend.
+        # Liste: deutsche Lande zuerst, dann Nachbarn (je nach Fläche).
         def sort_key(fid):
-            foreign = 1 if FACTIONS[fid].get("foreign") else 0
-            return (foreign, -order.get(fid, 0))
+            return (1 if FACTIONS[fid].get("foreign") else 0, -order.get(fid, 0))
         faction_ids = sorted(byfac.keys(), key=sort_key)
 
         layers = {}
@@ -930,13 +1119,11 @@ def build():
             p = f"layers/territories/{year}.geojson"
             write(p, {"type": "FeatureCollection", "features": features})
             layers["territories"] = p
-
         if year in SETTLEMENTS:
             p = f"layers/settlements/{year}.json"
             write(p, {"schemaVersion": 1, "settlements": SETTLEMENTS[year]})
             layers["settlements"] = p
-
-        if src == "clio" and year in (1000, 1200, 1356, 1500):
+        if year in (1000, 1200, 1356, 1500):
             feats = [{"type": "Feature",
                       "properties": {k: z[k] for k in ("cultureId", "name", "color", "pattern", "note")},
                       "geometry": {"type": "Polygon", "coordinates": [z["ring"]]}} for z in LANG_ZONES]
@@ -944,17 +1131,14 @@ def build():
             write(p, {"type": "FeatureCollection", "features": feats})
             layers["cultures"] = p
 
-        write(f"eras/{year}.json", {"schemaVersion": 2, "year": year, "label": label,
-              "blurb": blurb, "view": {"bounds": view, "minZoom": 4, "maxZoom": 9},
+        write(f"eras/{year}.json", {"schemaVersion": 3, "year": year, "label": label,
+              "blurb": blurb, "view": {"bounds": view, "minZoom": 3, "maxZoom": 9},
               "layers": layers, "factionIds": faction_ids})
         index["snapshots"].append({"year": year, "file": f"eras/{year}.json", "label": label})
-        print(f"  era {year}: {len(features)} territories, factions={len(faction_ids)}")
+        print(f"  era {year:>5} ({hbkey:>5}{'+'+overlay if overlay else '':>8}): "
+              f"{len(features)} territories, {len(faction_ids)} factions")
 
-    # Alle Fraktionen ausgeben (auch solche, die nur von Städten referenziert
-    # werden, z. B. Mainz/Kurpfalz, die in Cliopatria im „Minor States“-Block
-    # aufgehen, aber als Stadt-Zuordnung gebraucht werden).
-    sz = write("factions/factions.json", {"schemaVersion": 2, "factions": FACTIONS})
-    _ = used_factions
+    sz = write("factions/factions.json", {"schemaVersion": 3, "factions": FACTIONS})
     write("eras/index.json", index)
     print(f"  factions.json: {len(FACTIONS)} factions ({sz} bytes)")
     print("Done.")

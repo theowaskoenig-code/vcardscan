@@ -1,12 +1,12 @@
 /* ChronoMap Service Worker — App-Shell und Daten für Offline-Betrieb cachen.
    Strategie: network-first (immer aktuell, wenn online), Cache nur als
    Offline-Reserve. So erscheinen Updates ohne manuelles Leeren des Caches. */
-const CACHE = "chronomap-v4";
+const CACHE = "chronomap-v5";
 
-const YEARS = [-100, 100, 500, 1000, 1200, 1356, 1500, 1648, 1815, 1871,
-  1914, 1919, 1938, 1942, 1961, 1990, 2024];
-const SETTLEMENT_YEARS = [100, 500, 1000, 1200, 1356, 1500, 1648, 1815, 1871,
-  1914, 1919, 1938, 1942, 1961, 1990, 2024];
+const YEARS = [-500, -200, -1, 200, 400, 500, 700, 800, 1000, 1200, 1356, 1500,
+  1648, 1700, 1789, 1815, 1880, 1914, 1920, 1938, 1945, 1960, 2000];
+const SETTLEMENT_YEARS = [500, 1000, 1200, 1356, 1500, 1648, 1815, 1880, 1914,
+  1920, 1938, 1960, 2000];
 const CULTURE_YEARS = [1000, 1200, 1356, 1500];
 
 const ASSETS = [

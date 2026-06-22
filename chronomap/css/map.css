@@ -41,3 +41,18 @@
 .cm-place-label.leaflet-tooltip:before { display: none; }
 
 .leaflet-tooltip.cm-tooltip:before { border-top-color: var(--paper-edge); }
+
+/* Territorien-Namen (Wappen-Ersatz): transparente Schrift mit Pergament-Halo. */
+.cm-label {
+  width: auto !important; height: auto !important;
+  margin: 0 !important; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.cm-label span {
+  display: inline-block; transform: translate(-50%, -50%);
+  white-space: nowrap;
+  font-family: var(--serif); font-size: 12px; font-weight: 700;
+  color: #2c2113; letter-spacing: 0.2px;
+  text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper),
+               0 0 2px var(--paper), 0 0 6px var(--paper);
+}

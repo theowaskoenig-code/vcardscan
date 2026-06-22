@@ -44,6 +44,37 @@ export function buildTerritories(L, geojson, factions, onSelect) {
     },
   });
 
+  // Beschriftungen: pro Fraktion an der größten Fläche; mit dem Zoom werden
+  // immer kleinere Territorien sichtbar (Namen statt nur Farben).
+  const labels = L.layerGroup();
+  const labelData = [];
+  for (const [fid, lyrs] of index) {
+    let best = null, bestArea = 0;
+    for (const l of lyrs) {
+      const b = l.getBounds();
+      const a = (b.getNorth() - b.getSouth()) * (b.getEast() - b.getWest());
+      if (a > bestArea) { bestArea = a; best = l; }
+    }
+    if (!best) continue;
+    const name = best.feature.properties.name || fid;
+    const marker = L.marker(best.getBounds().getCenter(), {
+      pane: "labels",
+      interactive: false,
+      keyboard: false,
+      icon: L.divIcon({ className: "cm-label", html: `<span>${name}</span>` }),
+    });
+    labelData.push({ marker, area: bestArea, on: false });
+  }
+
+  function refreshLabels(zoom) {
+    const thr = 3.2 / Math.pow(2, Math.max(0, zoom - 4)); // kleiner Schwellwert bei höherem Zoom
+    for (const d of labelData) {
+      const show = d.area >= thr;
+      if (show && !d.on) { labels.addLayer(d.marker); d.on = true; }
+      else if (!show && d.on) { labels.removeLayer(d.marker); d.on = false; }
+    }
+  }
+
   function resetAll() {
     layer.eachLayer((lyr) => {
       if (lyr.feature) lyr.setStyle(baseStyle(lyr.feature.properties, factions));
@@ -63,5 +94,5 @@ export function buildTerritories(L, geojson, factions, onSelect) {
     return bounds;
   }
 
-  return { layer, index, highlight, resetAll };
+  return { layer, index, highlight, resetAll, labels, refreshLabels };
 }

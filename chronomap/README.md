@@ -1,61 +1,48 @@
 # ChronoMap Deutschland
 
-Eine interaktive Geschichtskarte des Raums des heutigen Deutschland – von der
-Antike bis zur Reichsgründung. Mit durchgehendem **Zeitschieber** und einer
-Liste der **Mächte** zu jedem Zeitpunkt, die sich anklicken, auf der Karte
-hervorheben und im Detail anzeigen lassen.
+Eine interaktive Geschichtskarte Mitteleuropas im europäischen Kontext – von
+der Antike bis heute. Mit **Zeitschieber** über 23 Epochen und einer Liste der
+**Mächte** zu jedem Zeitpunkt, die sich anklicken, hervorheben und im Detail
+anzeigen lassen. Territorien tragen **Namensbeschriftungen**, die beim
+Hineinzoomen immer feiner werden.
 
 > Optik im **Pergament-Stil** (Sepia, Serifenschrift). Reine statische Web-App
 > ohne Build-Schritt.
 
-## Epochen (17)
+## Epochen (23)
 
-| Jahr | Epoche | Datenquelle |
-|------|--------|-------------|
-| ~100 v. Chr. | Kelten & Germanen | Näherungszonen (eigene Arbeit) |
-| ~100 n. Chr. | Römisches Reich & Limes | Näherungszonen (eigene Arbeit) |
-| ~500 | Völkerwanderung | Näherungszonen (eigene Arbeit) |
-| 1000 | Ottonisches Reich | Cliopatria |
-| 1200 | Stauferzeit | Cliopatria |
-| 1356 | Goldene Bulle | Cliopatria |
-| 1500 | Reichsreform | Cliopatria |
-| 1648 | Westfälischer Friede | Cliopatria |
-| 1815 | Deutscher Bund | Cliopatria |
-| 1871 | Deutsches Kaiserreich | Cliopatria |
-| 1914 | Vor dem Ersten Weltkrieg | Cliopatria |
-| 1919 | Weimarer Republik (Versailles) | Cliopatria |
-| 1938 | NS-Staat (Anschluss & Sudetenland) | Cliopatria |
-| 1942 | Zweiter Weltkrieg (größte Ausdehnung) | Cliopatria |
-| 1961 | Geteiltes Deutschland (BRD & DDR) | Cliopatria |
-| 1990 | Wiedervereinigung | Cliopatria |
-| Heute | Bundesrepublik (16 Bundesländer) | deutschlandGeoJSON |
+23 Zeitschnitte von **500 v. Chr. bis heute**, europaweit:
 
-Der Zeitschieber läuft durchgehend; die Karte zeigt jeweils den
-**nächstgelegenen** definierten Zeitschnitt.
+- **Antike:** 500 v. Chr., 200 v. Chr., Christi Geburt, 200, 400 (Kelten,
+  Germanen, Römisches Reich, Spätantike)
+- **Mittelalter:** 500 (Völkerwanderung), 700, 800 (Karl d. Gr.), 1000, 1200,
+  1356 (Goldene Bulle), 1500
+- **Neuzeit:** 1648 (Westfälischer Friede), 1700, 1789, 1815 (Deutscher Bund),
+  1880 (Kaiserreich)
+- **20./21. Jh.:** 1914, 1920 (Weimar), 1938 (NS-Staat), 1945 (Besatzung),
+  1960 (geteiltes Deutschland), heute (16 Bundesländer)
 
-## Daten & Genauigkeit
+Der index-basierte Zeitschieber gibt jeder Epoche gleich viel Platz.
 
-- **Territorien 1000–2024** stammen aus **Cliopatria** (Seshat Global History
-  Databank), einem recherchierten, offen lizenzierten Datensatz mit echten
-  Grenzverläufen — **CC BY 4.0**. Für die Karte ausgewählt, auf Mitteleuropa
-  zugeschnitten und vereinfacht.
+## Daten & Genauigkeit (mehrere Datenbanken zusammengeführt)
+
+- **Grenzen aller Epochen, europaweit:** **historical-basemaps** von
+  A. Ourednik — echte, geografisch eingepasste Verläufe für ~40 Stichjahre.
+  Lizenz **GPL**. <https://github.com/aourednik/historical-basemaps>
+- **Deutsches Detail** (Kurfürstentümer/Flickenteppich 1356/1500/1648):
+  **Cliopatria** (Seshat Global History Databank, **CC BY 4.0**) als Overlay.
   <https://github.com/Seshat-Global-History-Databank/cliopatria>
-- **Bundesländer** (Epoche „Heute“) aus **deutschlandGeoJSON** (Public
-  Domain / Unlicense). <https://github.com/isellsoap/deutschlandGeoJSON>
+- **Bundesländer** (Epoche „Heute“): **deutschlandGeoJSON** (Public Domain).
+  <https://github.com/isellsoap/deutschlandGeoJSON>
+- **Pergament-Untergrund (ganz Europa):** **Natural Earth 50 m** (gemeinfrei).
 - Das **20. Jahrhundert** ist bewusst nüchtern dargestellt; die NS-Zeit
-  (1938/1942) zeigt historische Tatsachen (auch militärisch besetzte Gebiete)
-  ohne Verherrlichung.
-- **Antike Epochen** (~100 v. Chr., ~100, ~500) sind **von Hand angelegte
-  Näherungszonen** (eigene Arbeit). Für diese Zeit gibt es keine exakten
-  Vektordaten, und Stammesgrenzen waren ohnehin fließend — daher bewusst grob
-  und als näherungsweise gekennzeichnet.
-- **Küsten/Seen** (Pergament-Untergrund): **Natural Earth** (gemeinfrei).
-- **Nachbarmächte** (Frankreich, Polen, Ungarn, Dänemark …) werden gedämpft
-  dargestellt, damit die deutschen Lande hervortreten.
+  (1938) zeigt historische Tatsachen (auch besetzte Gebiete) ohne Verherrlichung.
+- **Nachbarmächte** werden gedämpft dargestellt, damit die deutschen Lande
+  hervortreten.
 
-Sachangaben (Herrscherhäuser, Kurfürsten, Daten) nach gängiger
-Geschichtsliteratur. Grenzen sind vereinfacht; vor wissenschaftlicher
-Verwendung mit Fachquellen abgleichen.
+Grenzen sind vereinfacht und zwischen den Stichjahren auf den nächsten
+Zeitschnitt gerundet; vor wissenschaftlicher Verwendung mit Fachquellen
+abgleichen.
 
 ## Funktionen
 
@@ -104,7 +91,9 @@ die Polygone auf Mitteleuropa zu, vereinfacht sie und schreibt alle
 ## Lizenzen
 
 - Code: wie Repository.
-- Territoriendaten: **CC BY 4.0** (Cliopatria / Seshat Global History Databank).
+- Grenzdaten (Hauptquelle): **GPL** (historical-basemaps, A. Ourednik).
+  Die hieraus abgeleiteten Dateien stehen entsprechend unter GPL.
+- Deutsches Detail: **CC BY 4.0** (Cliopatria / Seshat Global History Databank).
 - Bundesländer: Public Domain / Unlicense (deutschlandGeoJSON).
 - Küstendaten: Natural Earth (gemeinfrei).
 - Kartenbibliothek: Leaflet (BSD-2-Clause).

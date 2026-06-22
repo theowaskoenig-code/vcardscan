@@ -12,21 +12,26 @@ export class MapView {
     this.map = L.map(containerId, {
       zoomControl: true,
       attributionControl: true,
-      minZoom: 4,
+      minZoom: 3,
       maxZoom: 10,
       worldCopyJump: false,
     });
     this.map.attributionControl.setPrefix(
-      'Territorien (1000–2024) © <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria / Seshat</a> ' +
+      'Grenzen © <a href="https://github.com/aourednik/historical-basemaps">historical-basemaps</a> (GPL) · ' +
+      'deutsches Detail © <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria/Seshat</a> ' +
       '(<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>) · ' +
-      'Bundesländer © <a href="https://github.com/isellsoap/deutschlandGeoJSON">deutschlandGeoJSON</a> (Public Domain) · ' +
+      'Bundesländer © <a href="https://github.com/isellsoap/deutschlandGeoJSON">deutschlandGeoJSON</a> (PD) · ' +
       'Küsten © <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth</a> · ' +
-      '<a href="https://leafletjs.com">Leaflet</a> · ' +
-      'antike Zonen & Grenzen vereinfacht/näherungsweise'
+      '<a href="https://leafletjs.com">Leaflet</a> · Grenzen vereinfacht'
     );
 
     this.createPanes();
-    this.map.setView([50.5, 10.5], 5);
+    this.map.setView([49.0, 11.0], 4);
+    this.map.on("zoomend", () => {
+      if (this.territoryCtl && this.map.hasLayer(this.territoryCtl.labels)) {
+        this.territoryCtl.refreshLabels(this.map.getZoom());
+      }
+    });
 
     this.current = { territories: null, cultures: null, settlements: null };
     this.territoryCtl = null; // {layer, highlight, resetAll, index}
@@ -36,7 +41,7 @@ export class MapView {
 
   createPanes() {
     const defs = [
-      ["base", 350], ["territories", 410], ["cultures", 420], ["settlements", 430],
+      ["base", 350], ["territories", 410], ["labels", 415], ["cultures", 420], ["settlements", 430],
     ];
     for (const [name, z] of defs) {
       this.map.createPane(name);
@@ -71,6 +76,15 @@ export class MapView {
     if (!lyr) return;
     if (visible) { if (!this.map.hasLayer(lyr)) lyr.addTo(this.map); }
     else { this.map.removeLayer(lyr); }
+    // Beschriftungen folgen der Territorien-Ebene.
+    if (name === "territories" && this.territoryCtl) {
+      if (visible) {
+        this.territoryCtl.labels.addTo(this.map);
+        this.territoryCtl.refreshLabels(this.map.getZoom());
+      } else {
+        this.map.removeLayer(this.territoryCtl.labels);
+      }
+    }
   }
 
   _layerObj(name) {
@@ -83,6 +97,7 @@ export class MapView {
   clearLayers() {
     for (const obj of Object.values(this.current)) {
       if (obj && obj.layer) this.map.removeLayer(obj.layer);
+      if (obj && obj.labels) this.map.removeLayer(obj.labels);
     }
     this.current = { territories: null, cultures: null, settlements: null };
     this.territoryCtl = null;
@@ -95,7 +110,11 @@ export class MapView {
     if (snap.territories) {
       this.territoryCtl = buildTerritories(L, snap.territories, this.factions, this.onSelect);
       this.current.territories = this.territoryCtl;
-      if (visibility.territories) this.territoryCtl.layer.addTo(this.map);
+      if (visibility.territories) {
+        this.territoryCtl.layer.addTo(this.map);
+        this.territoryCtl.labels.addTo(this.map);
+        this.territoryCtl.refreshLabels(this.map.getZoom());
+      }
     }
     if (snap.cultures) {
       this.current.cultures = buildCultures(L, snap.cultures);
