@@ -9,28 +9,32 @@ Hineinzoomen immer feiner werden.
 > Optik im **Pergament-Stil** (Sepia, Serifenschrift). Reine statische Web-App
 > ohne Build-Schritt.
 
-## Epochen (23)
+## Epochen (36)
 
-23 Zeitschnitte von **500 v. Chr. bis heute**, europaweit:
+36 Zeitschnitte von **500 v. Chr. bis heute**, europaweit. **Ab 850
+mindestens alle 50 Jahre** (modern noch dichter), damit die Entwicklung
+sichtbar wird – z. B. der deutsche Bogen: Ostfrankenreich (850) → Königreich
+Deutschland (900) → Heiliges Römisches Reich (ab ~1000) → Kurfürsten-
+Flickenteppich (ab ~1350) → Deutscher Bund (1815) → Kaiserreich (1871) →
+geteilt (1961) → 16 Bundesländer (heute).
 
-- **Antike:** 500 v. Chr., 200 v. Chr., Christi Geburt, 200, 400 (Kelten,
-  Germanen, Römisches Reich, Spätantike)
-- **Mittelalter:** 500 (Völkerwanderung), 700, 800 (Karl d. Gr.), 1000, 1200,
-  1356 (Goldene Bulle), 1500
-- **Neuzeit:** 1648 (Westfälischer Friede), 1700, 1789, 1815 (Deutscher Bund),
-  1880 (Kaiserreich)
-- **20./21. Jh.:** 1914, 1920 (Weimar), 1938 (NS-Staat), 1945 (Besatzung),
-  1960 (geteiltes Deutschland), heute (16 Bundesländer)
+- **Antike (historical-basemaps):** 500/200 v. Chr., Christi Geburt, 100, 300,
+  500, 700 (Kelten, Germanen, Rom, Völkerwanderung, Franken)
+- **850–1800 (Cliopatria, alle 50 Jahre):** 850, 900, … , 1800
+- **Modern (dichter):** 1815, 1848, 1871, 1900, 1914, 1938, 1961, 1990, heute
 
 Der index-basierte Zeitschieber gibt jeder Epoche gleich viel Platz.
 
 ## Daten & Genauigkeit (mehrere Datenbanken zusammengeführt)
 
-- **Grenzen aller Epochen, europaweit:** **historical-basemaps** von
-  A. Ourednik — echte, geografisch eingepasste Verläufe für ~40 Stichjahre.
-  Lizenz **GPL**. <https://github.com/aourednik/historical-basemaps>
-- **Deutsches Detail** (Kurfürstentümer/Flickenteppich 1356/1500/1648):
-  **Cliopatria** (Seshat Global History Databank, **CC BY 4.0**) als Overlay.
+- **Antike (bis ~700):** **historical-basemaps** von A. Ourednik — echte,
+  geografisch eingepasste Verläufe mit kultureller Tiefe (keltische/germanische
+  Stämme, Rom). Lizenz **GPL**.
+  <https://github.com/aourednik/historical-basemaps>
+- **Ab 850 (Hauptquelle):** **Cliopatria** (Seshat Global History Databank,
+  **CC BY 4.0**) — ein **kontinuierlicher** Datensatz, der ein dichtes
+  50-Jahres-Raster erlaubt; das deutsche Detail (Kurfürstentümer, Staaten,
+  Bundesländer) ergibt sich direkt aus den Daten.
   <https://github.com/Seshat-Global-History-Databank/cliopatria>
 - **Bundesländer** (Epoche „Heute“): **deutschlandGeoJSON** (Public Domain).
   <https://github.com/isellsoap/deutschlandGeoJSON>
