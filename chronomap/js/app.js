@@ -8,7 +8,7 @@ import { FactionPanel } from "./factions.js";
 
 const $ = (id) => document.getElementById(id);
 
-const visibility = { territories: true, settlements: true, cultures: false };
+const visibility = { territories: true, wappen: true, settlements: true, cultures: false };
 
 let map, panel, timeline;
 let currentSnapshot = null; // {meta, territories, cultures, settlements}
@@ -51,7 +51,7 @@ async function showSnapshot(entry) {
 }
 
 function wireLayerToggles() {
-  const map3 = { layerTerritories: "territories", layerSettlements: "settlements", layerCultures: "cultures" };
+  const map3 = { layerTerritories: "territories", layerWappen: "wappen", layerSettlements: "settlements", layerCultures: "cultures" };
   for (const [id, name] of Object.entries(map3)) {
     const cb = $(id);
     cb.checked = visibility[name];
@@ -70,6 +70,7 @@ async function boot() {
   $("factionsHint").textContent = T.factionsHint;
   $("layersLabel").textContent = T.layers;
   $("lblTerritories").textContent = T.layerTerritories;
+  $("lblWappen").textContent = T.layerWappen;
   $("lblSettlements").textContent = T.layerSettlements;
   $("lblCultures").textContent = T.layerCultures;
 

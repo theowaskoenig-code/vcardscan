@@ -22,6 +22,7 @@ Benötigt die Cliopatria-Datei lokal (wird bei Bedarf heruntergeladen):
   /tmp/clio_out/cliopatria_polities_only.geojson
 """
 import json, os, math, re, zlib, urllib.request, zipfile, io
+from urllib.parse import quote
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
@@ -1066,6 +1067,78 @@ DE_NAMES.update({
 })
 GERMAN_SET.update({"East Franks", "Kingdom of Germany", "Frankish Kingdom", "Carolingian Empire"})
 
+# Englische Restnamen (Langer Schwanz) ins Deutsche übersetzen.
+DE_NAMES.update({
+  "Estonia":"Estland","Republic of Estonia":"Estland","Latvia":"Lettland",
+  "Republic of Latvia":"Lettland","Lithuania":"Litauen","Kingdom of Lithuania":"Litauen",
+  "Republic of Lithuania":"Litauen","Finland":"Finnland","Republic of Finland":"Finnland",
+  "Romania":"Rumänien","Kingdom of Romania":"Rumänien","Bulgaria":"Bulgarien",
+  "Principality of Bulgaria":"Fürstentum Bulgarien","Kingdom of Bulgaria":"Königreich Bulgarien",
+  "Greece":"Griechenland","Kingdom of Greece":"Königreich Griechenland",
+  "First Hellenic Republic":"Griechenland","Hellenic Republic":"Griechenland",
+  "Turkey":"Türkei","Republic of Turkey":"Türkei","Albania":"Albanien","Kingdom of Albania":"Albanien",
+  "Serbia":"Serbien","Kingdom of Serbia":"Serbien","Montenegro":"Montenegro",
+  "Kingdom of Yugoslavia":"Jugoslawien","Yugoslavia":"Jugoslawien","Croatia":"Kroatien",
+  "Second Spanish Republic":"Spanische Republik","Spanish Nationalists":"Spanische Nationalisten",
+  "Spanish State":"Spanien","Kingdom of Spain":"Spanien","Portugal":"Portugal","Estado Novo":"Portugal (Estado Novo)",
+  "Kingdom of Great Britain":"Großbritannien","United Kingdom":"Vereinigtes Königreich",
+  "United Kingdom of Great Britain and Ireland":"Vereinigtes Königreich","Irish Free State":"Irischer Freistaat",
+  "Ireland":"Irland","Iceland":"Island","French Africa":"Französisch-Afrika",
+  "French Mandate for Syria":"Französisch-Syrien (Mandat)",
+  "French Mandate for Syria and the Lebanon":"Französisch-Syrien (Mandat)",
+  "Soviet Union":"Sowjetunion","Republic of Austria":"Republik Österreich",
+  "Kingdom of Iceland":"Island","French Mandate for Syria and Lebanon":"Französisch-Syrien (Mandat)","Kingdom of Iraq":"Königreich Irak","Mandatory Iraq":"Irak (Mandat)","French Indochina":"Französisch-Indochina",
+  "Second Republic of Austria":"Republik Österreich","Norway":"Norwegen","Sweden":"Schweden",
+  "Denmark":"Dänemark","Belgium":"Belgien","Netherlands":"Niederlande","Switzerland":"Schweiz",
+})
+
+# Wappen (Coats of Arms) – Dateinamen auf Wikimedia Commons. Werden im Browser
+# über Special:FilePath geladen; fehlerhafte Namen werden einfach ausgeblendet.
+# NS-Zeit bewusst OHNE Hoheitszeichen.
+COA = {
+  "hre":"Holy Roman Empire Arms-double head.svg",
+  "boehmen":"Coat of arms of Bohemia.svg",
+  "bayern":"Coat of arms of Bavaria.svg","bayern_kgr":"Coat of arms of Bavaria.svg",
+  "sachsen_kur":"Coat of arms of Saxony.svg","brandenburg":"Coat of arms of Brandenburg.svg",
+  "brandenburg_preussen":"Coat of arms of Brandenburg.svg",
+  "preussen":"Wappen Königreich Preußen.svg",
+  "habsburg":"Coat of arms of the Archduchy of Austria.svg",
+  "oesterreich_kaisertum":"Coat of arms of the Austrian Empire.svg",
+  "oesterreich_ungarn":"Imperial Coat of Arms of Austria-Hungary (1915).svg",
+  "oesterreich_rep":"Austria Bundesadler.svg",
+  "deutsches_reich":"Wappen Deutsches Reich - Reichsadler 1889.svg",
+  "deutscher_bund":"Coat of arms of the German Confederation.svg",
+  "brd":"Coat of arms of Germany.svg","ddr":"Coat of arms of East Germany.svg",
+  "mainz":"Wappen Erzbistum Mainz.svg","koeln":"Wappen Erzbistum Köln.svg",
+  "trier":"Wappen Erzbistum Trier.svg","pfalz":"Wappen Kurpfalz.svg",
+  "deutschorden":"Cross of the Teutonic Order.svg",
+  "eidgenossenschaft":"Coat of arms of Switzerland.svg",
+  "wuerttemberg_kgr":"Wappen Königreich Württemberg.svg","baden":"Wappen Großherzogtum Baden.svg",
+  "welfen":"Wappen Königreich Hannover.svg","boehmen2":"Coat of arms of Bohemia.svg",
+  # Nachbarn
+  "frankreich":"Grand Royal Coat of Arms of France.svg","polen":"Coat of arms of Poland.svg",
+  "polen_litauen":"Coat of arms of the Polish–Lithuanian Commonwealth.svg",
+  "ungarn":"Coat of arms of Hungary.svg","daenemark":"National Coat of arms of Denmark.svg",
+  "schweden":"Coat of arms of Sweden.svg","norwegen":"Coat of arms of Norway.svg",
+  "russland":"Coat of arms of the Russian Empire.svg","spanien":"Coat of Arms of Spain.svg",
+  "italien":"Coat of arms of Italy.svg","niederlande":"Royal coat of arms of the Netherlands.svg",
+  "belgien":"Great coat of arms of Belgium.svg","venedig":"Coat of arms of the Republic of Venice.svg",
+  "osmanen":"Coat of arms of the Ottoman Empire (1882–1922).svg",
+  # 16 Bundesländer (Epoche „heute“)
+  "bl_bw":"Coat of arms of Baden-Württemberg (lesser).svg","bl_by":"Coat of arms of Bavaria.svg",
+  "bl_be":"Coat of arms of Berlin.svg","bl_bb":"Coat of arms of Brandenburg.svg",
+  "bl_hb":"Coat of arms of Bremen.svg","bl_hh":"Coat of arms of Hamburg.svg",
+  "bl_he":"Coat of arms of Hesse.svg","bl_mv":"Coat of arms of Mecklenburg-Western Pomerania (great).svg",
+  "bl_ni":"Coat of arms of Lower Saxony.svg","bl_nw":"Coat of arms of North Rhine-Westphalia.svg",
+  "bl_rp":"Coat of arms of Rhineland-Palatinate.svg","bl_sl":"Coat of arms of Saarland.svg",
+  "bl_sn":"Coat of arms of Saxony.svg","bl_st":"Coat of arms of Saxony-Anhalt.svg",
+  "bl_sh":"Coat of arms of Schleswig-Holstein.svg","bl_th":"Coat of arms of Thuringia.svg",
+}
+
+
+def coa_url(filename):
+    return "https://commons.wikimedia.org/wiki/Special:FilePath/" + quote(filename) + "?width=44"
+
 # HB-Name -> bestehende (kuratierte) Fraktions-ID.
 HB_MAP = {
   "Holy Roman Empire":"hre",
@@ -1243,9 +1316,14 @@ def build():
         print(f"  era {year:>5} [{src:>13}]: {len(features):>3} territories, "
               f"{len(faction_ids):>3} factions")
 
+    coa_set = 0
+    for fid, fn in COA.items():
+        if fid in FACTIONS:
+            FACTIONS[fid]["coa"] = coa_url(fn)
+            coa_set += 1
     sz = write("factions/factions.json", {"schemaVersion": 3, "factions": FACTIONS})
     write("eras/index.json", index)
-    print(f"  factions.json: {len(FACTIONS)} factions ({sz} bytes)")
+    print(f"  factions.json: {len(FACTIONS)} factions ({sz} bytes), {coa_set} Wappen")
     print("Done.")
 
 

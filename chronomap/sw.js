@@ -1,7 +1,7 @@
 /* ChronoMap Service Worker — App-Shell und Daten für Offline-Betrieb cachen.
    Strategie: network-first (immer aktuell, wenn online), Cache nur als
    Offline-Reserve. So erscheinen Updates ohne manuelles Leeren des Caches. */
-const CACHE = "chronomap-v7";
+const CACHE = "chronomap-v8";
 
 const YEARS = [-1000, -500, -300, -200, -100, -1, 100, 200, 300, 400, 500, 600,
   700, 800,

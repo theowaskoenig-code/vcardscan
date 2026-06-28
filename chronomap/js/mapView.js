@@ -21,6 +21,7 @@ export class MapView {
       'deutsches Detail © <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria/Seshat</a> ' +
       '(<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>) · ' +
       'Bundesländer © <a href="https://github.com/isellsoap/deutschlandGeoJSON">deutschlandGeoJSON</a> (PD) · ' +
+      'Wappen © <a href="https://commons.wikimedia.org/">Wikimedia Commons</a> · ' +
       'Küsten © <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth</a> · ' +
       '<a href="https://leafletjs.com">Leaflet</a> · Grenzen vereinfacht'
     );
@@ -28,9 +29,10 @@ export class MapView {
     this.createPanes();
     this.map.setView([49.0, 11.0], 4);
     this.map.on("zoomend", () => {
-      if (this.territoryCtl && this.map.hasLayer(this.territoryCtl.labels)) {
-        this.territoryCtl.refreshLabels(this.map.getZoom());
-      }
+      if (!this.territoryCtl) return;
+      const z = this.map.getZoom();
+      if (this.map.hasLayer(this.territoryCtl.labels)) this.territoryCtl.refreshLabels(z);
+      if (this.map.hasLayer(this.territoryCtl.wappen)) this.territoryCtl.refreshWappen(z);
     });
 
     this.current = { territories: null, cultures: null, settlements: null };
@@ -41,7 +43,8 @@ export class MapView {
 
   createPanes() {
     const defs = [
-      ["base", 350], ["territories", 410], ["labels", 415], ["cultures", 420], ["settlements", 430],
+      ["base", 350], ["territories", 410], ["labels", 415], ["wappen", 416],
+      ["cultures", 420], ["settlements", 430],
     ];
     for (const [name, z] of defs) {
       this.map.createPane(name);
@@ -85,10 +88,19 @@ export class MapView {
         this.map.removeLayer(this.territoryCtl.labels);
       }
     }
+    if (name === "wappen" && this.territoryCtl) {
+      if (visible) {
+        this.territoryCtl.wappen.addTo(this.map);
+        this.territoryCtl.refreshWappen(this.map.getZoom());
+      } else {
+        this.map.removeLayer(this.territoryCtl.wappen);
+      }
+    }
   }
 
   _layerObj(name) {
     if (name === "territories") return this.territoryCtl && this.territoryCtl.layer;
+    if (name === "wappen") return this.territoryCtl && this.territoryCtl.wappen;
     if (name === "cultures") return this.current.cultures && this.current.cultures.layer;
     if (name === "settlements") return this.current.settlements && this.current.settlements.layer;
     return null;
@@ -98,6 +110,7 @@ export class MapView {
     for (const obj of Object.values(this.current)) {
       if (obj && obj.layer) this.map.removeLayer(obj.layer);
       if (obj && obj.labels) this.map.removeLayer(obj.labels);
+      if (obj && obj.wappen) this.map.removeLayer(obj.wappen);
     }
     this.current = { territories: null, cultures: null, settlements: null };
     this.territoryCtl = null;
@@ -114,6 +127,10 @@ export class MapView {
         this.territoryCtl.layer.addTo(this.map);
         this.territoryCtl.labels.addTo(this.map);
         this.territoryCtl.refreshLabels(this.map.getZoom());
+      }
+      if (visibility.wappen) {
+        this.territoryCtl.wappen.addTo(this.map);
+        this.territoryCtl.refreshWappen(this.map.getZoom());
       }
     }
     if (snap.cultures) {

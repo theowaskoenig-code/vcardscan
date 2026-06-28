@@ -48,6 +48,8 @@ export function buildTerritories(L, geojson, factions, onSelect) {
   // immer kleinere Territorien sichtbar (Namen statt nur Farben).
   const labels = L.layerGroup();
   const labelData = [];
+  const wappen = L.layerGroup();
+  const wappenData = [];
   for (const [fid, lyrs] of index) {
     let best = null, bestArea = 0;
     for (const l of lyrs) {
@@ -56,23 +58,42 @@ export function buildTerritories(L, geojson, factions, onSelect) {
       if (a > bestArea) { bestArea = a; best = l; }
     }
     if (!best) continue;
+    const center = best.getBounds().getCenter();
     const name = best.feature.properties.name || fid;
-    const marker = L.marker(best.getBounds().getCenter(), {
-      pane: "labels",
-      interactive: false,
-      keyboard: false,
-      icon: L.divIcon({ className: "cm-label", html: `<span>${name}</span>` }),
+    labelData.push({
+      marker: L.marker(center, {
+        pane: "labels", interactive: false, keyboard: false,
+        icon: L.divIcon({ className: "cm-label", html: `<span>${name}</span>` }),
+      }), area: bestArea, on: false,
     });
-    labelData.push({ marker, area: bestArea, on: false });
+    // Wappen (falls vorhanden): defektes Bild blendet sich selbst aus.
+    const coa = factions[fid] && factions[fid].coa;
+    if (coa) {
+      wappenData.push({
+        marker: L.marker(center, {
+          pane: "wappen", interactive: false, keyboard: false,
+          icon: L.divIcon({
+            className: "cm-wappen",
+            html: `<img src="${coa}" alt="" loading="lazy" ` +
+              `onerror="this.parentNode.style.display='none'">`,
+          }),
+        }), area: bestArea, on: false,
+      });
+    }
   }
 
-  function refreshLabels(zoom) {
-    const thr = 3.2 / Math.pow(2, Math.max(0, zoom - 4)); // kleiner Schwellwert bei höherem Zoom
-    for (const d of labelData) {
+  function _toggle(group, data, thr) {
+    for (const d of data) {
       const show = d.area >= thr;
-      if (show && !d.on) { labels.addLayer(d.marker); d.on = true; }
-      else if (!show && d.on) { labels.removeLayer(d.marker); d.on = false; }
+      if (show && !d.on) { group.addLayer(d.marker); d.on = true; }
+      else if (!show && d.on) { group.removeLayer(d.marker); d.on = false; }
     }
+  }
+  function refreshLabels(zoom) {
+    _toggle(labels, labelData, 3.2 / Math.pow(2, Math.max(0, zoom - 4)));
+  }
+  function refreshWappen(zoom) {
+    _toggle(wappen, wappenData, 4.0 / Math.pow(2, Math.max(0, zoom - 4)));
   }
 
   function resetAll() {
@@ -94,5 +115,5 @@ export function buildTerritories(L, geojson, factions, onSelect) {
     return bounds;
   }
 
-  return { layer, index, highlight, resetAll, labels, refreshLabels };
+  return { layer, index, highlight, resetAll, labels, refreshLabels, wappen, refreshWappen };
 }

@@ -11,6 +11,7 @@ export const T = {
   close: "Schließen",
   layers: "Ebenen",
   layerTerritories: "Territorien",
+  layerWappen: "Wappen",
   layerSettlements: "Städte",
   layerCultures: "Kultur & Sprache",
   field: {
