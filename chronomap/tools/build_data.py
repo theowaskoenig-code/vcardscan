@@ -171,13 +171,13 @@ FACTIONS = {
     origin="Der „Flickenteppich“ aus Hunderten von Herrschaften innerhalb des Reiches.",
     house="zahlreiche Dynastien, Bischöfe und Reichsstädte", capital=None,
     eras={
-      "1356": {"keyFacts": ["Hunderte geistliche und weltliche Territorien sowie Reichsstädte.",
+      "1350": {"keyFacts": ["Hunderte geistliche und weltliche Territorien sowie Reichsstädte.",
                             "Die Goldene Bulle von 1356 regelt die Königswahl durch sieben Kurfürsten.",
                             "Drei geistliche (Mainz, Köln, Trier) und vier weltliche Kurfürsten (Böhmen, Pfalz, Sachsen-Wittenberg, Brandenburg)."]},
       "1500": {"keyFacts": ["Reichsreform unter Maximilian I.: Ewiger Landfriede 1495, Reichskammergericht.",
                             "Einteilung in Reichskreise; Name nun „… Deutscher Nation“.",
                             "Über 300 reichsunmittelbare Territorien."]},
-      "1648": {"keyFacts": ["Nach dem Westfälischen Frieden 1648: faktische Souveränität der Reichsstände.",
+      "1650": {"keyFacts": ["Nach dem Westfälischen Frieden 1648: faktische Souveränität der Reichsstände.",
                             "Über 300 Territorien; das Reich als lockerer Verband.",
                             "Frankreich und Schweden werden Garantiemächte des Friedens."]},
     }),
@@ -190,7 +190,7 @@ FACTIONS = {
       "1000": {"rank": "duchy", "name": "Herzogtum Böhmen", "rulingHouse": "Přemysliden",
                "keyFacts": ["Herzogtum der Přemysliden, dem Reich locker verbunden."]},
       "1200": {"rulingHouse": "Přemysliden", "keyFacts": ["1198 zum erblichen Königreich erhoben (Ottokar I. Přemysl)."]},
-      "1356": {"rulingHouse": "Haus Luxemburg (Karl IV.)",
+      "1350": {"rulingHouse": "Haus Luxemburg (Karl IV.)",
                "keyFacts": ["Kurstimme als eines der sieben Kurfürstentümer.",
                             "Kulturelles Zentrum des Reiches unter Karl IV.; Universität Prag 1348.",
                             "Mit Mähren, Schlesien und der Lausitz zur „Krone Böhmen“ verbunden."]},
@@ -202,10 +202,10 @@ FACTIONS = {
     origin="Bajuwarisches Stammesherzogtum; seit 1180 wittelsbachisch.",
     house="Haus Wittelsbach", capital="München",
     eras={
-      "1356": {"keyFacts": ["Mehrfach geteilt; die Wittelsbacher halten zeitweise auch Brandenburg und die Pfalz."]},
+      "1350": {"keyFacts": ["Mehrfach geteilt; die Wittelsbacher halten zeitweise auch Brandenburg und die Pfalz."]},
       "1500": {"keyFacts": ["Nach dem Landshuter Erbfolgekrieg (1504/05) weitgehend wiedervereinigt.",
                             "Primogenitur sichert künftig die Einheit des Herzogtums."]},
-      "1648": {"name": "Kurfürstentum Bayern", "rank": "electorate",
+      "1650": {"name": "Kurfürstentum Bayern", "rank": "electorate",
                "keyFacts": ["1623 mit der pfälzischen Kurwürde belehnt (Maximilian I.).",
                             "Im Westfälischen Frieden als Kurfürstentum bestätigt; achte Kur für die Pfalz neu geschaffen."]},
     }),
@@ -220,7 +220,7 @@ FACTIONS = {
   "askanien": F("Haus Askanien", "#8a6d3b", "margraviate",
     origin="Markgrafen von Brandenburg seit Albrecht dem Bären (1157).",
     house="Askanier", capital="Brandenburg/Tangermünde",
-    eras={"1356": {"name": "Mark Brandenburg (Askanier/Wittelsbach)",
+    eras={"1350": {"name": "Mark Brandenburg (Askanier/Wittelsbach)",
                    "keyFacts": ["Inhaber der brandenburgischen Kurstimme (Erzkämmerer).",
                                 "Um 1356 unter wittelsbachischer Herrschaft; 1373 an die Luxemburger."]}}),
   "brandenburg": F("Kurfürstentum Brandenburg", "#4a5a6e", "electorate",
@@ -231,7 +231,7 @@ FACTIONS = {
   "brandenburg_preussen": F("Brandenburg-Preußen", "#3f5066", "electorate",
     origin="Personalunion Brandenburgs mit dem Herzogtum Preußen (1618).",
     house="Haus Hohenzollern", capital="Berlin",
-    eras={"1648": {"keyFacts": ["Gewinnt im Westfälischen Frieden u. a. Hinterpommern und Magdeburg.",
+    eras={"1650": {"keyFacts": ["Gewinnt im Westfälischen Frieden u. a. Hinterpommern und Magdeburg.",
                                 "Unter dem „Großen Kurfürsten“ Friedrich Wilhelm Aufstieg zur Militärmacht."]}}),
   "preussen": F("Königreich Preußen", "#3f5066", "kingdom",
     origin="1701 zum Königreich erhoben; nach 1815 Großmacht im Deutschen Bund.",
@@ -245,12 +245,12 @@ FACTIONS = {
     origin="Askanisches Kurfürstentum an der Elbe; ab 1423 wettinisch.",
     house="Haus Wettin", capital="Wittenberg/Dresden",
     eras={
-      "1356": {"name": "Kursachsen (Sachsen-Wittenberg)", "rulingHouse": "Askanier",
+      "1350": {"name": "Kursachsen (Sachsen-Wittenberg)", "rulingHouse": "Askanier",
                "keyFacts": ["Die Goldene Bulle weist die sächsische Kur Sachsen-Wittenberg zu.",
                             "Weltlicher Kurfürst und Erzmarschall des Reiches."]},
       "1500": {"keyFacts": ["1485 Leipziger Teilung in ernestinische (Kur) und albertinische Linie.",
                             "Bald darauf Ausgangspunkt der Reformation (Wittenberg, 1517)."]},
-      "1648": {"keyFacts": ["Führende protestantische Macht; erhält 1635 die Lausitz.",
+      "1650": {"keyFacts": ["Führende protestantische Macht; erhält 1635 die Lausitz.",
                             "Im Dreißigjährigen Krieg schwankend zwischen den Lagern."]},
     }),
 
@@ -259,7 +259,7 @@ FACTIONS = {
     origin="Hausmacht der Habsburger um Österreich, Steiermark, Kärnten und Tirol.",
     house="Haus Habsburg", capital="Wien/Innsbruck",
     eras={
-      "1356": {"name": "Haus Habsburg (Österreich)", "rank": "duchy",
+      "1350": {"name": "Haus Habsburg (Österreich)", "rank": "duchy",
                "keyFacts": ["Habsburgisch seit 1278 (Schlacht bei Dürnkrut).",
                             "Mit dem gefälschten Privilegium Maius beanspruchen sie Sonderrechte.",
                             "Nicht unter den sieben Kurfürsten der Goldenen Bulle."]},
@@ -267,7 +267,7 @@ FACTIONS = {
                "keyFacts": ["Maximilian I. ist römisch-deutscher König und Erzherzog von Österreich.",
                             "Durch Heiratspolitik (Burgund, Spanien) Aufstieg zur Weltmacht.",
                             "„Bella gerant alii, tu felix Austria nube.“"]},
-      "1648": {"name": "Habsburgermonarchie", "rulingHouse": "Haus Habsburg",
+      "1650": {"name": "Habsburgermonarchie", "rulingHouse": "Haus Habsburg",
                "keyFacts": ["Stellt fast durchgehend den Kaiser; Zentrum der katholischen Gegenreformation.",
                             "Verliert mit dem Westfälischen Frieden den Kampf um ein zentralisiertes Reich.",
                             "Erblande Österreich, Böhmen und (königliches) Ungarn."]},
@@ -283,21 +283,21 @@ FACTIONS = {
   "mainz": F("Kurmainz (Erzbistum Mainz)", "#9c5a52", "electorate",
     origin="Erzbistum seit dem 8. Jh.; der Erzbischof ist Erzkanzler für Deutschland.",
     house="geistliches Fürstentum (Erzbischof)", capital="Mainz",
-    eras={"1356": {"keyFacts": ["Erster geistlicher Kurfürst; leitet als Erzkanzler die Königswahl."]}}),
+    eras={"1350": {"keyFacts": ["Erster geistlicher Kurfürst; leitet als Erzkanzler die Königswahl."]}}),
   "koeln": F("Kurköln (Erzbistum Köln)", "#7d4a44", "electorate",
     origin="Erzbistum seit der Spätantike; einer der reichsten Kirchenfürsten.",
     house="geistliches Fürstentum (Erzbischof)", capital="Köln (Residenz Bonn)",
-    eras={"1356": {"keyFacts": ["Geistlicher Kurfürst und Erzkanzler für Italien.",
+    eras={"1350": {"keyFacts": ["Geistlicher Kurfürst und Erzkanzler für Italien.",
                                 "Die Stadt Köln selbst ist faktisch Freie Reichsstadt."]}}),
   "trier": F("Kurtrier (Erzbistum Trier)", "#b06a4e", "electorate",
     origin="Ältestes Bistum nördlich der Alpen.",
     house="geistliches Fürstentum (Erzbischof)", capital="Trier (später Koblenz)",
-    eras={"1356": {"keyFacts": ["Geistlicher Kurfürst und Erzkanzler für Burgund.",
+    eras={"1350": {"keyFacts": ["Geistlicher Kurfürst und Erzkanzler für Burgund.",
                                 "Territorium entlang der Mosel."]}}),
   "pfalz": F("Kurpfalz", "#8c5a3c", "electorate",
     origin="Pfalzgrafschaft bei Rhein, seit 1214 wittelsbachisch.",
     house="Haus Wittelsbach", capital="Heidelberg",
-    eras={"1356": {"keyFacts": ["Weltlicher Kurfürst; der Pfalzgraf ist Reichsvikar."]}}),
+    eras={"1350": {"keyFacts": ["Weltlicher Kurfürst; der Pfalzgraf ist Reichsvikar."]}}),
 
   # ---- Weitere deutsche Territorien ----
   "wuerttemberg": F("Württemberg", "#6e6240", "county",
@@ -315,13 +315,13 @@ FACTIONS = {
   "hessen": F("Landgrafschaft Hessen", "#7c8456", "landgraviate",
     origin="1264 aus dem thüringischen Erbe entstanden.",
     house="Haus Hessen", capital="Kassel/Marburg",
-    eras={"1356": {"keyFacts": ["Eigenständige Landgrafschaft zwischen Rhein, Main und Weser."]}}),
+    eras={"1350": {"keyFacts": ["Eigenständige Landgrafschaft zwischen Rhein, Main und Weser."]}}),
 
   # ---- Welfen / Braunschweig / Norddeutschland ----
   "welfen": F("Welfische Herzogtümer (Braunschweig-Lüneburg)", "#94794e", "duchy",
     origin="Welfischer Restbesitz nach dem Sturz Heinrichs des Löwen (1180).",
     house="Welfen", capital="Braunschweig/Lüneburg",
-    eras={"1648": {"keyFacts": ["Mehrfach geteilt (u. a. Calenberg, Lüneburg, Wolfenbüttel).",
+    eras={"1650": {"keyFacts": ["Mehrfach geteilt (u. a. Calenberg, Lüneburg, Wolfenbüttel).",
                                 "Aus der Linie Calenberg geht später Hannover hervor."]}}),
 
   # ---- Schweiz / Deutscher Orden ----
@@ -330,17 +330,17 @@ FACTIONS = {
     origin="1291 als Bund der Waldstätte entstanden.",
     house="Bund autonomer Orte", capital=None,
     eras={
-      "1356": {"keyFacts": ["Um 1353 zum „Bund der acht Orte“ gewachsen (u. a. Zürich, Luzern, Bern).",
+      "1350": {"keyFacts": ["Um 1353 zum „Bund der acht Orte“ gewachsen (u. a. Zürich, Luzern, Bern).",
                             "Formal Teil des Reiches, faktisch zunehmend eigenständig."]},
       "1500": {"keyFacts": ["Nach dem Schwabenkrieg 1499 faktisch vom Reich unabhängig.",
                             "Im Frieden von Basel von der Reichsgerichtsbarkeit gelöst."]},
-      "1648": {"foreign": True, "keyFacts": ["Im Westfälischen Frieden 1648 formell aus dem Reichsverband entlassen."]},
+      "1650": {"foreign": True, "keyFacts": ["Im Westfälischen Frieden 1648 formell aus dem Reichsverband entlassen."]},
     }),
   "deutschorden": F("Deutschordensstaat", "#4a4f5e", "theocracy",
     origin="Geistlicher Ritterorden, 1190 im Heiligen Land (Akkon) gegründet; ab 1226 Eroberung und Christianisierung Preußens.",
     house="Deutscher Orden (Hochmeister)", capital="Marienburg (ab 1309)",
     eras={
-      "1356": {"keyFacts": ["Mächtiger deutscher Kreuzritterstaat in Preußen und im Baltikum.",
+      "1350": {"keyFacts": ["Mächtiger deutscher Kreuzritterstaat in Preußen und im Baltikum.",
                             "Residenz des Hochmeisters ist die Marienburg, die größte Backsteinburg Europas.",
                             "Wirtschaftlich über die Hanse eng mit dem Reich verbunden.",
                             "Dauerkonflikt mit dem christlichen Polen-Litauen."]},
@@ -369,7 +369,7 @@ FACTIONS = {
                    "keyFacts": ["Am Vorabend des Ersten Weltkriegs eine führende Industrie- und Militärmacht.",
                                 "Kolonialreich in Afrika und im Pazifik.",
                                 "Bündnis mit Österreich-Ungarn (Mittelmächte)."]},
-          "1919": {"name": "Deutsches Reich (Weimarer Republik)", "rank": "republic",
+          "1925": {"name": "Deutsches Reich (Weimarer Republik)", "rank": "republic",
                    "rulingHouse": "Parlamentarische Republik", "capital": "Berlin (Nationalversammlung in Weimar)",
                    "keyFacts": ["Nach Kriegsniederlage und Novemberrevolution 1918 wird das Reich Republik.",
                                 "Der Versailler Vertrag erzwingt Gebietsabtretungen: Elsass-Lothringen an Frankreich, "
@@ -977,14 +977,15 @@ def clio_features_for(clio, year, clip=CLIP_DE, auto=False, skip=None):
     return feats
 
 
-def to_feature(fid, geom_polys):
+def to_feature(fid, geom_polys, year):
     fac = FACTIONS[fid]
+    ov = (fac.get("eras") or {}).get(str(year), {})  # epochenspezifische Werte
     coords = geom_polys
     gtype = "MultiPolygon" if len(coords) != 1 else "Polygon"
     geometry = {"type": "MultiPolygon", "coordinates": coords} if gtype == "MultiPolygon" \
         else {"type": "Polygon", "coordinates": coords[0]}
-    props = {"factionId": fid, "name": fac["name"], "color": fac["color"]}
-    if fac.get("foreign"):
+    props = {"factionId": fid, "name": ov.get("name", fac["name"]), "color": fac["color"]}
+    if ov.get("foreign", fac.get("foreign")):
         props["foreign"] = True
     return {"type": "Feature", "properties": props, "geometry": geometry}
 
@@ -1211,7 +1212,7 @@ def build():
 
         # Große Flächen zuerst (z-Reihenfolge), kleine Detail-Territorien oben.
         fids_sorted = sorted(byfac.keys(), key=lambda k: order.get(k, 0), reverse=True)
-        features = [to_feature(fid, byfac[fid]) for fid in fids_sorted]
+        features = [to_feature(fid, byfac[fid], year) for fid in fids_sorted]
 
         # Liste: deutsche Lande zuerst, dann Nachbarn (je nach Fläche).
         def sort_key(fid):
