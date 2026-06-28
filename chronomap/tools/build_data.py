@@ -775,20 +775,34 @@ LANG_ZONES = [
 #   "clio+laender"   -> Cliopatria + 16 Bundesländer (Gegenwart)
 # Ab 850 ein dichtes Raster (mind. alle 50 Jahre), modern noch feiner.
 _ANCIENT = [
+  (-1000,"Um 1000 v. Chr. — Bronzezeit","hb:bc1000",VIEW_EUROPE,
+   "Bronzezeit: die Urnenfelderkultur prägt Mitteleuropa, lange vor Kelten und Germanen."),
   (-500,"Um 500 v. Chr. — Kelten & frühe Völker","hb:bc500",VIEW_EUROPE,
    "Vor Rom und den großen Wanderungen prägen keltische Kulturen West- und Mitteleuropa, im Norden frühe Germanen."),
+  (-300,"Um 300 v. Chr. — Keltische Welt","hb:bc300",VIEW_EUROPE,
+   "Die Kelten auf dem Höhepunkt ihrer Ausdehnung; Keltenzüge reichen bis Griechenland und Kleinasien."),
   (-200,"Um 200 v. Chr. — Kelten & Germanen","hb:bc200",VIEW_EUROPE,
    "Die keltische La-Tène-Kultur auf ihrem Höhepunkt; germanische Stämme drängen nach Süden, Rom wächst."),
+  (-100,"Um 100 v. Chr. — Vor Caesar","hb:bc100",VIEW_EUROPE,
+   "Kurz vor Caesars Gallischem Krieg; germanische Stämme drängen über den Rhein."),
   (-1,"Christi Geburt — Rom & Germanien","hb:bc1",VIEW_EUROPE,
    "Rom reicht bis an Rhein und Donau; östlich liegt das freie Germanien. 9 n. Chr. stoppt die Varusschlacht Roms Vormarsch."),
   (100,"Um 100 — Römisches Reich","hb:100",VIEW_EUROPE,
    "Pax Romana: Rom beherrscht den Mittelmeerraum, die Grenze verläuft am Limes."),
+  (200,"Um 200 — Hochphase des Imperiums","hb:200",VIEW_EUROPE,
+   "Das Römische Reich nahe seiner größten Ausdehnung; jenseits des Limes leben die Germanen."),
   (300,"Um 300 — Spätantike","hb:300",VIEW_EUROPE,
    "Das Römische Reich gerät unter Druck; an den Grenzen formieren sich germanische Verbände."),
+  (400,"Um 400 — Hunnensturm","hb:400",VIEW_EUROPE,
+   "Hunnen und germanische Wanderungen erschüttern das Weströmische Reich."),
   (500,"Um 500 — Völkerwanderung","hb:500",VIEW_EUROPE,
    "Nach dem Untergang Westroms entstehen germanische Reiche: Franken, Goten, Sachsen, Thüringer, Alemannen."),
+  (600,"Um 600 — Germanische Reiche","hb:600",VIEW_EUROPE,
+   "Franken, Westgoten und Langobarden teilen das alte weströmische Gebiet."),
   (700,"Um 700 — Fränkisches Reich","hb:700",VIEW_EUROPE,
    "Das Frankenreich der Merowinger wird zur beherrschenden Macht westlich des Rheins."),
+  (800,"800 — Karl der Große","hb:800",VIEW_EUROPE,
+   "Karl der Große eint weite Teile Europas; 800 Kaiserkrönung — eine Wurzel des Reiches."),
 ]
 _NOTE = {
   850:"Nach der Teilung von Verdun (843): Ost- und Westfrankenreich",
@@ -818,7 +832,9 @@ _MODERN = [
   (1871,"1871 — Deutsches Kaiserreich","Reichsgründung unter preußischer Führung (kleindeutsche Lösung)."),
   (1900,"Um 1900 — Kaiserreich","Industrialisierung, Weltmachtstreben, Bündnissysteme."),
   (1914,"1914 — Erster Weltkrieg","Das Kaiserreich, verbündet mit Österreich-Ungarn, zieht in den Krieg."),
+  (1925,"1925 — Weimarer Republik","Die junge Republik zwischen Inflation, Krisen und kurzer Stabilisierung."),
   (1938,"1938 — NS-Staat","Anschluss Österreichs und des Sudetenlands; aggressive Expansion."),
+  (1942,"1942 — Zweiter Weltkrieg","Größte Ausdehnung der deutschen Herrschaft; weite Teile Europas sind besetzt. Zeit von Vernichtungskrieg und Holocaust."),
   (1961,"1961 — Geteiltes Deutschland","BRD und DDR im Kalten Krieg; Bau der Berliner Mauer."),
   (1990,"1990 — Wiedervereinigung","Die DDR tritt am 3. Oktober 1990 der Bundesrepublik bei."),
   (2024,"Heute — Bundesrepublik Deutschland","16 Bundesländer, eingebunden in EU und NATO. Tippe ein Bundesland an."),
@@ -945,8 +961,17 @@ def clio_features_for(clio, year, clip=CLIP_DE, auto=False, skip=None):
             if not auto:
                 continue  # Unkartierte (meist ferne) Polities überspringen
             fid = hb_faction(nm)  # europaweit: automatische Fraktion erzeugen
-        # Fläche im Kartenausschnitt (für Z-Reihenfolge), gleiche Einheit wie
-        # die Bundesländer — nicht die globale km²-Angabe aus Cliopatria.
+        # Jede Fraktion mit Wikipedia-Link und Bestandszeitraum anreichern,
+        # damit jedes Gebiet beim Antippen Details zeigt.
+        fac = FACTIONS[fid]
+        w = p.get("Wikipedia")
+        if w and not fac.get("wiki"):
+            fac["wiki"] = w
+        fy0, ty0 = p.get("FromYear"), p.get("ToYear")
+        if fy0 is not None:
+            fac["from"] = fy0 if fac.get("from") is None else min(fac["from"], fy0)
+        if ty0 is not None:
+            fac["to"] = ty0 if fac.get("to") is None else max(fac["to"], ty0)
         area = sum(shoelace(poly[0]) for poly in geom)
         feats.append((fid, nm, geom, area))
     return feats
@@ -1096,8 +1121,9 @@ def hb_faction(name):
         german = name in GERMAN_SET
         pal = WARM if german else COOL
         col = pal[zlib.crc32(name.encode("utf-8")) % len(pal)]
+        # "en" = englischer Quellname für einen Wikipedia-Fallback-Link.
         FACTIONS[fid] = {"name": DE_NAMES.get(name, name), "color": col,
-                         "foreign": (not german)}
+                         "foreign": (not german), "en": name}
     return fid
 
 

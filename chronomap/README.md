@@ -9,11 +9,11 @@ Hineinzoomen immer feiner werden.
 > Optik im **Pergament-Stil** (Sepia, Serifenschrift). Reine statische Web-App
 > ohne Build-Schritt.
 
-## Epochen (36)
+## Epochen (45)
 
-36 Zeitschnitte von **500 v. Chr. bis heute**, europaweit. **Ab 850
-mindestens alle 50 Jahre** (modern noch dichter), damit die Entwicklung
-sichtbar wird – z. B. der deutsche Bogen: Ostfrankenreich (850) → Königreich
+45 Zeitschnitte von **1000 v. Chr. bis heute**, europaweit. **Ab 850
+mindestens alle 50 Jahre** (Antike und Moderne zusätzlich verdichtet), damit
+die Entwicklung sichtbar wird – z. B. der deutsche Bogen: Ostfrankenreich (850) → Königreich
 Deutschland (900) → Heiliges Römisches Reich (ab ~1000) → Kurfürsten-
 Flickenteppich (ab ~1350) → Deutscher Bund (1815) → Kaiserreich (1871) →
 geteilt (1961) → 16 Bundesländer (heute).

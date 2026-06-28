@@ -20,7 +20,10 @@ export const T = {
     origin: "Ursprung",
     keyFacts: "Wissenswertes",
     rank: "Rang",
+    span: "Bestand (etwa)",
   },
+  genericAbout: "Historische Macht bzw. historisches Territorium in Europa zu dieser Zeit.",
+  wikipedia: "Mehr auf Wikipedia",
   rank: {
     empire: "Reich", kingdom: "Königreich", archduchy: "Erzherzogtum",
     duchy: "Herzogtum", electorate: "Kurfürstentum", margraviate: "Markgrafschaft",

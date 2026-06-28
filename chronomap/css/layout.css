@@ -125,6 +125,9 @@ hr.rule { border: none; border-top: 1px solid var(--line); margin: 12px 0; }
 .info-facts h4 { font-size: 13px; margin-bottom: 4px; }
 .info-facts ul { margin-left: 18px; font-size: 13px; line-height: 1.45; }
 .info-facts li { margin-bottom: 3px; }
+.info-wiki { margin-top: 10px; font-size: 13px; }
+.info-wiki a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.info-wiki a:hover { text-decoration: underline; }
 
 /* Breite Bildschirme: Panel als rechte Spalte. */
 @media (min-width: 760px) {

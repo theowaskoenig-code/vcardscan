@@ -75,16 +75,32 @@ export class FactionPanel {
       rows.push(`<div class="info-row"><dt>${label}</dt><dd>${val}</dd></div>`);
     };
 
+    const hasRich = f.origin || (Array.isArray(f.keyFacts) && f.keyFacts.length)
+      || f.rulingHouse || f.capital;
+    const fmtYear = (y) => (y == null ? "?" : (y < 0 ? `${-y} v. Chr.` : `${y} n. Chr.`));
+
     addRow(T.field.rank, f.rank ? (T.rank[f.rank] || f.rank) : "");
     addRow(T.field.rulingHouse, f.rulingHouse);
     addRow(T.field.capital, f.capital);
     addRow(T.field.religion, f.religion);
-    addRow(T.field.origin, f.origin);
+    if (f.from != null || f.to != null) {
+      addRow(T.field.span, `${fmtYear(f.from)} – ${fmtYear(f.to)}`);
+    }
+    // Jede Macht zeigt mindestens etwas: kuratierter Ursprung oder generischer Text.
+    addRow(T.field.origin, f.origin || (hasRich ? "" : T.genericAbout));
 
     let facts = "";
     if (Array.isArray(f.keyFacts) && f.keyFacts.length) {
       facts = `<div class="info-facts"><h4>${T.field.keyFacts}</h4><ul>` +
         f.keyFacts.map((x) => `<li>${x}</li>`).join("") + "</ul></div>";
+    }
+
+    let wiki = "";
+    const wikiTitle = f.wiki || f.en;
+    if (wikiTitle) {
+      const url = "https://en.wikipedia.org/wiki/" +
+        encodeURIComponent(String(wikiTitle).replace(/ /g, "_"));
+      wiki = `<p class="info-wiki"><a href="${url}" target="_blank" rel="noopener">${T.wikipedia} ↗</a></p>`;
     }
 
     const note = hasTerritory ? "" : `<p class="info-note">${T.noTerritory}</p>`;
@@ -96,7 +112,8 @@ export class FactionPanel {
        </div>
        ${note}
        <dl class="info-grid">${rows.join("")}</dl>
-       ${facts}`;
+       ${facts}
+       ${wiki}`;
     this.infoEl.classList.add("open");
     this.infoEl.querySelector(".info-close").addEventListener("click", () => this.onSelect(fid));
   }
