@@ -775,6 +775,42 @@ LANG_ZONES = [
 #   "clio"           -> Cliopatria, europaweit (kontinuierlich, jedes Jahr)
 #   "clio+laender"   -> Cliopatria + 16 Bundesländer (Gegenwart)
 # Ab 850 ein dichtes Raster (mind. alle 50 Jahre), modern noch feiner.
+# Binnengliederung des Reiches (Stammesherzogtümer & Territorien), ~843–1250.
+# Für diese Zeit gibt es keine offenen Vektordaten der Reichsterritorien; daher
+# von Hand und näherungsweise angelegt und ÜBER den echten Reichsumriss
+# gezeichnet (Außengrenze bleibt also korrekt). Ab ~1300 übernimmt das echte
+# Kurfürsten-/Kleinstaaten-Detail aus Cliopatria.
+HRE_PARTS = [
+  ("hzg_sachsen","Herzogtum Sachsen","duchy",843,1250,"#8a6d4a",
+   [[7.0,51.4],[6.9,53.6],[8.8,54.0],[11.0,53.9],[11.9,52.2],[11.0,51.3],[9.0,51.0],[7.0,51.4]]),
+  ("hzg_franken","Herzogtum Franken","duchy",843,1200,"#9c7a4a",
+   [[7.8,49.3],[7.9,51.0],[11.3,51.0],[12.0,49.9],[10.8,49.1],[9.0,48.9],[7.8,49.3]]),
+  ("hzg_schwaben","Herzogtum Schwaben","duchy",843,1250,"#8a8d5a",
+   [[6.8,47.4],[6.8,49.2],[10.4,49.0],[10.9,47.8],[9.4,47.2],[7.8,47.2],[6.8,47.4]]),
+  ("hzg_bayern_m","Herzogtum Bayern","duchy",843,1250,"#5f7a5a",
+   [[10.9,47.3],[10.9,49.2],[13.6,49.1],[14.1,48.0],[12.9,47.1],[11.5,47.1],[10.9,47.3]]),
+  ("hzg_oberloth","Herzogtum Lothringen","duchy",925,1250,"#b06a4e",
+   [[5.0,47.9],[5.0,49.9],[6.9,49.9],[7.0,48.1],[6.1,47.6],[5.0,47.9]]),
+  ("hzg_niederloth","Herzogtum Niederlothringen","duchy",959,1190,"#9c5a52",
+   [[3.6,50.0],[3.6,52.4],[5.0,53.2],[7.0,52.4],[7.0,50.2],[5.4,49.8],[3.6,50.0]]),
+  ("hzg_kaernten","Herzogtum Kärnten","duchy",976,1250,"#7c8456",
+   [[12.0,46.0],[12.0,47.4],[15.0,47.5],[15.6,46.4],[14.0,45.8],[12.6,45.9],[12.0,46.0]]),
+  ("kgr_burgund","Königreich Burgund (Arelat)","kingdom",1033,1250,"#b5894f",
+   [[4.2,43.8],[4.0,46.2],[6.2,47.6],[8.0,46.9],[7.4,44.6],[5.8,43.6],[4.2,43.8]]),
+  ("mgf_meissen","Mark Meißen & Thüringen","margraviate",1089,1250,"#8a7b5a",
+   [[10.4,50.3],[10.4,51.8],[13.4,51.7],[13.2,50.4],[11.6,50.1],[10.4,50.3]]),
+  ("mgf_brandenburg","Mark Brandenburg","margraviate",1157,1250,"#6e7d8a",
+   [[11.6,51.9],[11.6,53.4],[14.6,53.4],[14.8,52.0],[13.2,51.6],[11.6,51.9]]),
+  ("hzg_oesterreich_m","Herzogtum Österreich","duchy",1156,1250,"#a8554a",
+   [[13.6,47.6],[13.6,49.0],[17.0,48.9],[17.2,47.8],[15.5,47.4],[13.6,47.6]]),
+  ("hzg_steiermark","Herzogtum Steiermark","duchy",1180,1250,"#a86a4a",
+   [[14.0,46.5],[14.0,47.7],[16.2,47.6],[16.4,46.4],[15.0,46.1],[14.0,46.5]]),
+]
+for _pid, _nm, _rk, _fr, _to, _col, _ring in HRE_PARTS:
+    FACTIONS[_pid] = {"name": _nm, "color": _col, "rank": _rk, "from": _fr, "to": _to,
+                      "origin": "Reichsterritorium des Heiligen Römischen Reiches "
+                                "(mittelalterliche Binnengliederung, näherungsweise)."}
+
 _ANCIENT = [
   (-1000,"Um 1000 v. Chr. — Bronzezeit","hb:bc1000",VIEW_EUROPE,
    "Bronzezeit: die Urnenfelderkultur prägt Mitteleuropa, lange vor Kelten und Germanen."),
@@ -1279,6 +1315,15 @@ def build():
             for fid, nm, geom, area in clio_features_for(clio, year, EUROPE_CLIP,
                                                          auto=True, skip=skip):
                 add(fid, geom, area)
+            # Binnengliederung des Reiches über den Reichsumriss legen (843–1250),
+            # solange Cliopatria das Reich noch als einen Block führt.
+            if 843 <= year <= 1250:
+                for _pid, _nm, _rk, _fr, _to, _col, _ring in HRE_PARTS:
+                    if _fr <= year <= _to:
+                        g = process_geometry({"type": "Polygon", "coordinates": [_ring]},
+                                             EUROPE_CLIP, EPS)
+                        if g:
+                            add(_pid, g, sum(shoelace(p[0]) for p in g))
             if laender:
                 for fid, geom, area in load_laender():
                     add(fid, geom, area)

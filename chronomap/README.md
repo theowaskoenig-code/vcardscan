@@ -38,6 +38,13 @@ Der index-basierte Zeitschieber gibt jeder Epoche gleich viel Platz.
   <https://github.com/Seshat-Global-History-Databank/cliopatria>
 - **Bundesländer** (Epoche „Heute“): **deutschlandGeoJSON** (Public Domain).
   <https://github.com/isellsoap/deutschlandGeoJSON>
+- **Binnengliederung des Reiches (~843–1250):** Stammesherzogtümer und
+  Territorien (Sachsen, Bayern, Schwaben, Franken, Lothringen, Kärnten,
+  Böhmen, Brandenburg, Österreich …) sind **von Hand und näherungsweise**
+  angelegt und über den echten Reichsumriss gelegt — für diese Zeit gibt es
+  keine offenen Vektordaten der Reichsterritorien. Ab ~1300 zeigt Cliopatria
+  das echte Kurfürsten-/Kleinstaaten-Detail.
+- **Wappen:** Wikimedia Commons (im Browser geladen).
 - **Pergament-Untergrund (ganz Europa):** **Natural Earth 50 m** (gemeinfrei).
 - Das **20. Jahrhundert** ist bewusst nüchtern dargestellt; die NS-Zeit
   (1938) zeigt historische Tatsachen (auch besetzte Gebiete) ohne Verherrlichung.
